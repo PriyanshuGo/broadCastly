@@ -1,6 +1,5 @@
 const cloudinary = require("cloudinary").v2;
 const fs = require("fs").promises;
-const path = require("path");
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -11,7 +10,7 @@ cloudinary.config({
 /**
  * Upload a local file to Cloudinary (async-safe and structured)
  */
-const uploadOnCloudinary = async (localFilePath, folder = "blogs") => {
+const uploadOnCloudinary = async (localFilePath, folder = "content") => {
     if (!localFilePath) {
         return { success: false, error: "No file path provided" };
     }
@@ -42,7 +41,7 @@ const uploadOnCloudinary = async (localFilePath, folder = "blogs") => {
         // Attempt cleanup if upload failed
         try {
             await fs.unlink(localFilePath);
-        } catch {}
+        } catch { }
 
         return {
             success: false,
@@ -75,7 +74,7 @@ const deleteFromCloudinary = async (publicId) => {
 
             {
 
-                resource_type: "image",
+                resource_type: "auto",
 
                 invalidate: true
 
@@ -127,7 +126,7 @@ const deleteMultipleFromCloudinary = async (publicIds = []) => {
             publicIds,
 
             {
-                resource_type: "image"
+                resource_type: "auto"
             }
 
         );

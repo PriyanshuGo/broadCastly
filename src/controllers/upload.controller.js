@@ -13,8 +13,11 @@ const uploadContentImage = asyncHandler(async (req, res) => {
 
     }
 
+    const username = req.user.username;
+    const folderPath = `content/${username}`;
+
     // use your existing function
-    const result = await uploadOnCloudinary(req.file.path, "blogs");
+    const result = await uploadOnCloudinary(req.file.path, folderPath);
 
     if (!result.success) {
 
