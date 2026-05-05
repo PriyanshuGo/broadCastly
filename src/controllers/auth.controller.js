@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const User = require("../models/user.model");
 const { generateToken } = require("../utils/jwt");
 
 const login = async (req, res) => {
@@ -26,7 +27,7 @@ const login = async (req, res) => {
     const token = generateToken({
       userId: user._id,
       email: user.email,
-      role: user.role 
+      role: user.role
     });
 
     return res.status(200).json({
@@ -50,6 +51,6 @@ const logout = async (req, res) => {
 module.exports = {
   login,
   logout,
-  
+
 };
 
