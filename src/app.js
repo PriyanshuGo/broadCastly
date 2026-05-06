@@ -3,8 +3,8 @@ const helmet = require("helmet");
 const cors = require("cors");
 
 const authRoutes = require("./routes/auth.routes");
-const uploadRoutes = require("./routes/upload.routes");
 const userRoutes = require("./routes/user.routes");
+const contentRoutes = require("./routes/content.routes");
 const { errorHandler } = require("./middlewares/error.middleware");
 
 const app = express();
@@ -33,8 +33,8 @@ app.use(express.json());
 
 // Routes
 app.use(authRoutes);
-app.use(uploadRoutes);
 app.use("/user",userRoutes);
+app.use("/content",contentRoutes);
 
 // Health check
 app.get("/", (req, res) => {

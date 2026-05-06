@@ -1,6 +1,6 @@
 const Content = require("../models/content.model");
 const Subject = require("../models/subject.model");
-const { deleteMultipleFromCloudinary } = require("../utils/cloudinary");
+const { uploadOnCloudinary, deleteMultipleFromCloudinary } = require("../utils/cloudinary");
 
 // ───────────── Create Draft Content ─────────────
 
@@ -42,6 +42,7 @@ const createDraftContent = async (req, res) => {
                         success: false,
                         message: "File upload failed",
                         error: uploaded.error,
+                        details: uploaded.details,
                     });
                 }
 
@@ -145,9 +146,16 @@ const updateDraftContent = async (req, res) => {
         let publicIdsToRemove = [];
 
         if (removeFilePublicIds) {
-            publicIdsToRemove = Array.isArray(removeFilePublicIds)
-                ? removeFilePublicIds
-                : JSON.parse(removeFilePublicIds);
+            try {
+                publicIdsToRemove = Array.isArray(removeFilePublicIds)
+                    ? removeFilePublicIds
+                    : JSON.parse(removeFilePublicIds);
+            } catch (error) {
+                return res.status(400).json({
+                    success: false,
+                    message: "removeFilePublicIds must be a valid JSON array",
+                });
+            }
         }
 
         if (publicIdsToRemove.length > 0) {
@@ -187,6 +195,7 @@ const updateDraftContent = async (req, res) => {
                         success: false,
                         message: "File upload failed",
                         error: uploaded.error,
+                        details: uploaded.details,
                     });
                 }
 
