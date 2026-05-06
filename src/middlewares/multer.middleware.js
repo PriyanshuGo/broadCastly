@@ -26,26 +26,40 @@ const storage = multer.diskStorage({
 });
 
 const allowedMimeTypes = [
+    // Images
     "image/png",
     "image/jpeg",
     "image/jpg",
     "image/webp",
+    "image/gif",
+    "image/svg+xml",
+    // Documents
     "application/pdf",
     "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    // Video
+    "video/mp4",
+    "video/webm",
+    "video/quicktime",
+    // Audio
+    "audio/mpeg",
+    "audio/wav",
+    "audio/ogg",
 ];
 
 const fileFilter = (req, file, cb) => {
     if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error("Only images, PDF, and Word files are allowed"));
+        cb(new Error(`File type "${file.mimetype}" is not allowed`));
     }
 };
 
 const upload = multer({
     storage,
-    limits: { fileSize: 10 * 1024 * 1024 },
+    limits: { fileSize: 20 * 1024 * 1024 },
     fileFilter
 });
 

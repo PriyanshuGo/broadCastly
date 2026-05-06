@@ -34,7 +34,7 @@ app.use(express.json());
 // Routes
 app.use(authRoutes);
 app.use(uploadRoutes);
-app.use(userRoutes);
+app.use("/user",userRoutes);
 
 // Health check
 app.get("/", (req, res) => {

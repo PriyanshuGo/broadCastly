@@ -10,7 +10,11 @@ cloudinary.config({
 /**
  * Upload a local file to Cloudinary (async-safe and structured)
  */
-const uploadOnCloudinary = async (localFilePath, folder = "content") => {
+const uploadOnCloudinary = async (
+    localFilePath,
+    originalFile,
+    folder = "content"
+) => {
     if (!localFilePath) {
         return { success: false, error: "No file path provided" };
     }
@@ -34,8 +38,28 @@ const uploadOnCloudinary = async (localFilePath, folder = "content") => {
 
         return {
             success: true,
-            url: response.secure_url,
-            public_id: response.public_id,
+
+            file: {
+                url: response.secure_url,
+
+                publicId: response.public_id,
+
+                resourceType: response.resource_type,
+
+                format: response.format,
+
+                originalName: originalFile.originalname,
+
+                mimeType: originalFile.mimetype,
+
+                sizeBytes: originalFile.size,
+
+                width: response.width,
+
+                height: response.height,
+
+                duration: response.duration,
+            },
         };
     } catch (error) {
         // Attempt cleanup if upload failed
