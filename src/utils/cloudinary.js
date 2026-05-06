@@ -76,109 +76,86 @@ const uploadOnCloudinary = async (
 };
 
 /**
- * Delete a file from Cloudinary
+ * Delete a single file from Cloudinary
  */
-const deleteFromCloudinary = async (publicId) => {
+// const deleteFromCloudinary = async (publicId, resourceType = "image") => {
+//     if (!publicId) {
+//         return {
+//             success: false,
+//             error: "No publicId provided",
+//         };
+//     }
 
-    if (!publicId) {
+//     try {
+//         const result = await cloudinary.uploader.destroy(publicId, {
+//             resource_type: resourceType,
+//             invalidate: true,
+//         });
 
-        console.log("No publicId provided");
+//         return {
+//             success: result.result === "ok" || result.result === "not found",
+//             result,
+//         };
+//     } catch (error) {
+//         return {
+//             success: false,
+//             error: "Cloudinary delete failed",
+//             details: error.message,
+//         };
+//     }
+// };
 
-        return { success: false };
-
+/**
+ * Delete multiple files from Cloudinary
+ */
+const deleteMultipleFromCloudinary = async (files = []) => {
+    if (!Array.isArray(files) || files.length === 0) {
+        return {
+            success: false,
+            error: "No files provided",
+        };
     }
 
     try {
+        const groupedByResourceType = files.reduce((acc, file) => {
+            if (!file.publicId) return acc;
 
-        console.log("Deleting from Cloudinary:", publicId);
+            const resourceType = file.resourceType || "image";
 
-        const result = await cloudinary.uploader.destroy(
-
-            publicId,
-
-            {
-
-                resource_type: "auto",
-
-                invalidate: true
-
+            if (!acc[resourceType]) {
+                acc[resourceType] = [];
             }
 
-        );
+            acc[resourceType].push(file.publicId);
 
-        console.log("Cloudinary delete result:", result);
+            return acc;
+        }, {});
 
-        return {
+        const results = {};
 
-            success: result.result === "ok"
+        for (const resourceType of Object.keys(groupedByResourceType)) {
+            const result = await cloudinary.api.delete_resources(
+                groupedByResourceType[resourceType],
+                {
+                    resource_type: resourceType,
+                    invalidate: true,
+                }
+            );
 
-        };
-
-    }
-
-    catch (error) {
-
-        console.error("Cloudinary delete error:", error);
-
-        return {
-
-            success: false,
-
-            error: error.message
-
-        };
-
-    }
-
-};
-
-const deleteMultipleFromCloudinary = async (publicIds = []) => {
-
-    if (!Array.isArray(publicIds) || publicIds.length === 0) {
+            results[resourceType] = result.deleted;
+        }
 
         return {
-            success: false,
-            error: "No publicIds array provided"
-        };
-
-    }
-
-    try {
-
-        const result = await cloudinary.api.delete_resources(
-
-            publicIds,
-
-            {
-                resource_type: "auto"
-            }
-
-        );
-
-        return {
-
             success: true,
-
-            deleted: result.deleted,
-
-            result
-
+            deleted: results,
         };
-
     } catch (error) {
-
         return {
-
             success: false,
-
             error: "Cloudinary bulk delete failed",
-
-            details: error.message
-
+            details: error.message,
         };
-
     }
-
 };
 
-module.exports = { uploadOnCloudinary, deleteFromCloudinary, deleteMultipleFromCloudinary };
+module.exports = { uploadOnCloudinary, deleteMultipleFromCloudinary };

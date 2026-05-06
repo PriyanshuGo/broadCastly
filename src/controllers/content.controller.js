@@ -1,0 +1,218 @@
+const Content = require("../models/content.model");
+const Subject = require("../models/subject.model");
+const { deleteMultipleFromCloudinary } = require("../utils/cloudinary");
+
+// ───────────── Create Draft Content ─────────────
+
+const createDraftContent = async (req, res) => {
+    try {
+        const {
+            title,
+            description,
+            subject,
+            startTime,
+            endTime,
+            rotationDuration,
+        } = req.body;
+
+        const subjectExists = await Subject.findOne({
+            _id: subject,
+            isActive: true,
+        });
+
+        if (!subjectExists) {
+            return res.status(404).json({
+                success: false,
+                message: "Subject not found or inactive",
+            });
+        }
+
+        const uploadedFiles = [];
+
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const uploaded = await uploadOnCloudinary(
+                    file.path,
+                    file,
+                    "content"
+                );
+
+                if (!uploaded.success) {
+                    return res.status(500).json({
+                        success: false,
+                        message: "File upload failed",
+                        error: uploaded.error,
+                    });
+                }
+
+                uploadedFiles.push(uploaded.file);
+            }
+        }
+
+        const content = await Content.create({
+            title,
+            description,
+            subject,
+            files: uploadedFiles,
+            createdBy: req.user._id,
+
+            status: "draft",
+
+            approvalRequestCount: 0,
+            approvalRequestedAt: null,
+            approvalRequests: [],
+
+            startTime,
+            endTime,
+            rotationDuration,
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Content draft created successfully",
+            data: content,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to create content draft",
+            error: error.message,
+        });
+    }
+};
+
+
+// ───────────── Update Draft Content ─────────────
+
+const updateDraftContent = async (req, res) => {
+    try {
+        const { contentId } = req.params;
+
+        const {
+            title,
+            description,
+            subject,
+            startTime,
+            endTime,
+            rotationDuration,
+            removeFilePublicIds,
+        } = req.body;
+
+        const content = await Content.findOne({
+            _id: contentId,
+            createdBy: req.user._id,
+        });
+
+        if (!content) {
+            return res.status(404).json({
+                success: false,
+                message: "Content not found",
+            });
+        }
+
+        if (content.status !== "draft") {
+            return res.status(400).json({
+                success: false,
+                message: "Only draft content can be updated from this route",
+            });
+        }
+
+        if (subject) {
+            const subjectExists = await Subject.findOne({
+                _id: subject,
+                isActive: true,
+            });
+
+            if (!subjectExists) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Subject not found or inactive",
+                });
+            }
+
+            content.subject = subject;
+        }
+
+        if (title !== undefined) content.title = title;
+        if (description !== undefined) content.description = description;
+        if (startTime !== undefined) content.startTime = startTime;
+        if (endTime !== undefined) content.endTime = endTime;
+
+        if (rotationDuration !== undefined) {
+            content.rotationDuration = rotationDuration;
+        }
+
+        let publicIdsToRemove = [];
+
+        if (removeFilePublicIds) {
+            publicIdsToRemove = Array.isArray(removeFilePublicIds)
+                ? removeFilePublicIds
+                : JSON.parse(removeFilePublicIds);
+        }
+
+        if (publicIdsToRemove.length > 0) {
+            const filesToRemove = content.files.filter((file) =>
+                publicIdsToRemove.includes(file.publicId)
+            );
+
+            if (filesToRemove.length > 0) {
+                const deleteResult = await deleteMultipleFromCloudinary(filesToRemove);
+
+                if (!deleteResult.success) {
+                    return res.status(500).json({
+                        success: false,
+                        message: "Failed to delete files from Cloudinary",
+                        error: deleteResult.error,
+                    });
+                }
+
+                content.files = content.files.filter(
+                    (file) => !publicIdsToRemove.includes(file.publicId)
+                );
+            }
+        }
+
+        if (req.files && req.files.length > 0) {
+            const uploadedFiles = [];
+
+            for (const file of req.files) {
+                const uploaded = await uploadOnCloudinary(
+                    file.path,
+                    file,
+                    "content"
+                );
+
+                if (!uploaded.success) {
+                    return res.status(500).json({
+                        success: false,
+                        message: "File upload failed",
+                        error: uploaded.error,
+                    });
+                }
+
+                uploadedFiles.push(uploaded.file);
+            }
+
+            content.files.push(...uploadedFiles);
+        }
+
+        await content.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Content draft updated successfully",
+            data: content,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update content draft",
+            error: error.message,
+        });
+    }
+};
+
+module.exports = {
+    createDraftContent,
+    updateDraftContent,
+};
