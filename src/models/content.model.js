@@ -37,12 +37,7 @@ const contentSchema = new mongoose.Schema(
          */
         files: {
             type: [fileSchema],
-            validate: {
-                validator: function (arr) {
-                    return arr.length > 0; // Ensure the content has at least one file
-                },
-                message: "At least one file is required",
-            },
+            default: [],
         },
 
         // ───────────── Ownership ─────────────
