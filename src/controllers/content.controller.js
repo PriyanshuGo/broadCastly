@@ -221,7 +221,162 @@ const updateDraftContent = async (req, res) => {
     }
 };
 
+// ───────────── Get My Contents ─────────────
+
+const getMyContents = async (req, res) => {
+    try {
+        const {
+            status,
+            search,
+            page = 1,
+            limit = 10,
+        } = req.query;
+
+        const query = {
+            createdBy: req.user._id,
+        };
+
+        if (status) {
+            query.status = status;
+        }
+
+        if (search) {
+            query.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+            ];
+        }
+
+        const skip = (Number(page) - 1) * Number(limit);
+
+        const [contents, total] = await Promise.all([
+            Content.find(query)
+                .populate("subject", "name")
+                .populate("reviewedBy", "name email")
+                .populate("approvedBy", "name email")
+                .populate("rejectedBy", "name email")
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(Number(limit)),
+
+            Content.countDocuments(query),
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            message: "Contents fetched successfully",
+            data: contents,
+            pagination: {
+                total,
+                page: Number(page),
+                limit: Number(limit),
+                totalPages: Math.ceil(total / Number(limit)),
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch contents",
+            error: error.message,
+        });
+    }
+};
+
+
+// ───────────── Get My Content By Id ─────────────
+
+const getMyContentById = async (req, res) => {
+    try {
+        const { contentId } = req.params;
+
+        const content = await Content.findOne({
+            _id: contentId,
+            createdBy: req.user._id,
+        })
+            .populate("subject", "name")
+            .populate("createdBy", "name email")
+            .populate("reviewedBy", "name email")
+            .populate("approvedBy", "name email")
+            .populate("rejectedBy", "name email");
+
+        if (!content) {
+            return res.status(404).json({
+                success: false,
+                message: "Content not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Content fetched successfully",
+            data: content,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch content",
+            error: error.message,
+        });
+    }
+};
+
+// ───────────── Delete My Content ─────────────
+
+const deleteMyContent = async (req, res) => {
+    try {
+        const { contentId } = req.params;
+
+        const content = await Content.findOne({
+            _id: contentId,
+            createdBy: req.user._id,
+        });
+
+        if (!content) {
+            return res.status(404).json({
+                success: false,
+                message: "Content not found",
+            });
+        }
+
+        if (!["draft", "rejected"].includes(content.status)) {
+            return res.status(400).json({
+                success: false,
+                message: "Only draft or rejected content can be deleted",
+            });
+        }
+
+        if (content.files && content.files.length > 0) {
+            const deleteResult = await deleteMultipleFromCloudinary(content.files);
+
+            if (!deleteResult.success) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Failed to delete content files from Cloudinary",
+                    error: deleteResult.error,
+                });
+            }
+        }
+
+        await Content.deleteOne({ _id: content._id });
+
+        return res.status(200).json({
+            success: true,
+            message: "Content deleted successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to delete content",
+            error: error.message,
+        });
+    }
+};
+
+
 module.exports = {
     createDraftContent,
     updateDraftContent,
+    getMyContents,
+    getMyContentById,
+    deleteMyContent,
 };

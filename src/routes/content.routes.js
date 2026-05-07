@@ -3,6 +3,9 @@ const express = require("express");
 const {
   createDraftContent,
   updateDraftContent,
+  getMyContents,
+  getMyContentById,
+  deleteMyContent,
 } = require("../controllers/content.controller");
 
 const {
@@ -43,6 +46,27 @@ router.patch(
   cleanupTempFiles,
   validateCreateDraftContent,
   updateDraftContent
+);
+
+// Get my contents
+router.get(
+  "/my",
+  authMiddleware,
+  getMyContents
+);
+
+// Get my content by ID
+router.get(
+  "/my/:contentId",
+  authMiddleware,
+  getMyContentById
+);
+
+// Delete my content
+router.delete(
+  "/my/:contentId",
+  authMiddleware,
+  deleteMyContent
 );
 
 module.exports = router;
