@@ -5,9 +5,11 @@ const cors = require("cors");
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
 const contentRoutes = require("./routes/content.routes");
+const approvalRoutes = require("./routes/approval.routes");
 const { errorHandler } = require("./middlewares/error.middleware");
 
 const app = express();
+
 
 app.use(cors({
   origin: [
@@ -33,9 +35,9 @@ app.use(express.json());
 
 // Routes
 app.use(authRoutes);
-app.use("/user",userRoutes);
-app.use("/content",contentRoutes);
-
+app.use("/user", userRoutes);
+app.use("/content", contentRoutes);
+app.use("/approvals", approvalRoutes);
 // Health check
 app.get("/", (req, res) => {
   res.send("API is running");

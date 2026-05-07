@@ -373,10 +373,88 @@ const deleteMyContent = async (req, res) => {
 };
 
 
+// ───────────── Request / Re-request Approval ─────────────
+
+const requestContentApproval = async (req, res) => {
+    try {
+        const { contentId } = req.params;
+
+        const {
+            approvalRequestNote,
+            changesSummary,
+        } = req.body;
+
+        const content = await Content.findOne({
+            _id: contentId,
+            createdBy: req.user._id,
+        });
+
+        if (!content) {
+            return res.status(404).json({
+                success: false,
+                message: "Content not found",
+            });
+        }
+
+        if (!["draft", "rejected"].includes(content.status)) {
+            return res.status(400).json({
+                success: false,
+                message: "Only draft or rejected content can be requested for approval",
+            });
+        }
+
+        if (!content.files || content.files.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "At least one file is required before requesting approval",
+            });
+        }
+
+        content.status = "pending";
+
+        content.approvalRequestCount += 1;
+        content.approvalRequestedAt = new Date();
+
+        content.approvalRequests.push({
+            requestedBy: req.user._id,
+            requestedAt: new Date(),
+            note: approvalRequestNote || null,
+            changesSummary: changesSummary || null,
+        });
+
+        // reset current review cycle
+        content.reviewedBy = null;
+        content.reviewedAt = null;
+
+        content.approvedBy = null;
+        content.approvedAt = null;
+
+        content.rejectedBy = null;
+        content.rejectedAt = null;
+        content.rejectionReason = null;
+
+        await content.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Content requested for approval successfully",
+            data: content,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to request content approval",
+            error: error.message,
+        });
+    }
+};
+
+
 module.exports = {
     createDraftContent,
     updateDraftContent,
     getMyContents,
     getMyContentById,
     deleteMyContent,
+    requestContentApproval,
 };

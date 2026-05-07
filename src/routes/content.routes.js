@@ -6,6 +6,7 @@ const {
   getMyContents,
   getMyContentById,
   deleteMyContent,
+  requestContentApproval,
 } = require("../controllers/content.controller");
 
 const {
@@ -18,6 +19,7 @@ const {
 
 const {
   validateCreateDraftContent,
+  validateRequestApproval,
 } = require("../validations/content.validation");
 
 const {
@@ -68,5 +70,15 @@ router.delete(
   authMiddleware,
   deleteMyContent
 );
+
+
+// Request approval (for draft/rejected content)
+router.patch(
+  "/request-approval/:contentId",
+  authMiddleware,
+  validateRequestApproval,
+  requestContentApproval
+);
+
 
 module.exports = router;
