@@ -4,6 +4,7 @@ const {
   createDraftContent,
   updateDraftContent,
   getMyContents,
+  getAllContents,
   getMyContentById,
   deleteMyContent,
   requestContentApproval,
@@ -12,6 +13,10 @@ const {
 const {
   authMiddleware,
 } = require("../middlewares/auth.middleware");
+
+const {
+  requirePermission,
+} = require("../middlewares/permission.middleware");
 
 const {
   upload,
@@ -25,6 +30,8 @@ const {
 const {
   cleanupTempFiles,
 } = require("../middlewares/cleanupTempFiles.middleware");
+
+const { PERMISSIONS } = require("../constants/permissions");
 
 const router = express.Router();
 
@@ -55,6 +62,14 @@ router.get(
   "/my",
   authMiddleware,
   getMyContents
+);
+
+// Get all contents (admin/principal view)
+router.get(
+  "/",
+  authMiddleware,
+  requirePermission(PERMISSIONS.CONTENT_VIEW_ALL),
+  getAllContents
 );
 
 // Get my content by ID

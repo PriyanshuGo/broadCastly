@@ -5,6 +5,7 @@ const {
     getApprovalRequestById,
     approveContent,
     rejectContent,
+    deleteContentByPrincipal,
 } = require("../controllers/approval.controller");
 
 const { authMiddleware } = require("../middlewares/auth.middleware");
@@ -45,6 +46,13 @@ router.patch(
     requirePermission(PERMISSIONS.CONTENT_REJECT),
     validateRejectContent,
     rejectContent
+);
+
+router.delete(
+    "/delete/:contentId",
+    authMiddleware,
+    requirePermission(PERMISSIONS.CONTENT_DELETE),
+    deleteContentByPrincipal
 );
 
 module.exports = router;

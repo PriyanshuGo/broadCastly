@@ -34,13 +34,6 @@ const validateCreateDraftContent = (req, res, next) => {
         errors.push("End time must be greater than start time");
     }
 
-    if (
-        rotationDuration !== undefined &&
-        Number(rotationDuration) < 1
-    ) {
-        errors.push("Rotation duration must be at least 1 second");
-    }
-
     if (description && description.length > 1000) {
         errors.push("Description cannot exceed 1000 characters");
     }

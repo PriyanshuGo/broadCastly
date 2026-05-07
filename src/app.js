@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
 const contentRoutes = require("./routes/content.routes");
 const approvalRoutes = require("./routes/approval.routes");
+const liveRoutes = require("./routes/live.routes");
 const { errorHandler } = require("./middlewares/error.middleware");
 
 const app = express();
@@ -38,6 +39,8 @@ app.use(authRoutes);
 app.use("/user", userRoutes);
 app.use("/content", contentRoutes);
 app.use("/approvals", approvalRoutes);
+app.use("/live", liveRoutes);
+
 // Health check
 app.get("/", (req, res) => {
   res.send("API is running");

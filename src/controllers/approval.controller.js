@@ -1,4 +1,5 @@
 const Content = require("../models/content.model");
+const { deleteMultipleFromCloudinary } = require("../utils/cloudinary");
 
 // ───────────── Get Pending Approval Requests ─────────────
 
@@ -166,9 +167,56 @@ const rejectContent = async (req, res) => {
     }
 };
 
+
+// ───────────── Delete Any Content (Principal/Admin) ─────────────
+
+const deleteContentByPrincipal = async (req, res) => {
+    try {
+        const { contentId } = req.params;
+
+        const content = await Content.findById(contentId);
+
+        if (!content) {
+            return res.status(404).json({
+                success: false,
+                message: "Content not found",
+            });
+        }
+
+        // delete all cloudinary files first
+        if (content.files && content.files.length > 0) {
+            const deleteResult = await deleteMultipleFromCloudinary(
+                content.files
+            );
+
+            if (!deleteResult.success) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Failed to delete content files from Cloudinary",
+                    error: deleteResult.error,
+                });
+            }
+        }
+
+        await Content.deleteOne({ _id: content._id });
+
+        return res.status(200).json({
+            success: true,
+            message: "Content deleted successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to delete content",
+            error: error.message,
+        });
+    }
+};
+
 module.exports = {
     getPendingApprovalRequests,
     getApprovalRequestById,
     approveContent,
     rejectContent,
+    deleteContentByPrincipal,
 };

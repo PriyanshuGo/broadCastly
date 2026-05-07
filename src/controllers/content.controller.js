@@ -249,7 +249,7 @@ const getMyContents = async (req, res) => {
 
         const skip = (Number(page) - 1) * Number(limit);
 
-        const [contents, total] = await Promise.all([
+        const [contents, total, totalUploadedContent] = await Promise.all([
             Content.find(query)
                 .populate("subject", "name")
                 .populate("reviewedBy", "name email")
@@ -260,12 +260,79 @@ const getMyContents = async (req, res) => {
                 .limit(Number(limit)),
 
             Content.countDocuments(query),
+            Content.countDocuments({ createdBy: req.user._id }),
         ]);
 
         return res.status(200).json({
             success: true,
             message: "Contents fetched successfully",
             data: contents,
+            totalUploadedContent,
+            pagination: {
+                total,
+                page: Number(page),
+                limit: Number(limit),
+                totalPages: Math.ceil(total / Number(limit)),
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch contents",
+            error: error.message,
+        });
+    }
+};
+
+
+// ───────────── Get All Contents ─────────────
+
+const getAllContents = async (req, res) => {
+    try {
+        const {
+            status,
+            search,
+            page = 1,
+            limit = 10,
+        } = req.query;
+
+        const query = {
+            status: { $ne: "draft" },
+        };
+
+        if (status && status !== "draft") {
+            query.status = status;
+        }
+
+        if (search) {
+            query.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+            ];
+        }
+
+        const skip = (Number(page) - 1) * Number(limit);
+
+        const [contents, total, totalUploadedContent] = await Promise.all([
+            Content.find(query)
+                .populate("subject", "name")
+                .populate("createdBy", "name email")
+                .populate("reviewedBy", "name email")
+                .populate("approvedBy", "name email")
+                .populate("rejectedBy", "name email")
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(Number(limit)),
+
+            Content.countDocuments(query),
+            Content.countDocuments({ status: { $ne: "draft" } }),
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            message: "All contents fetched successfully",
+            data: contents,
+            totalUploadedContent,
             pagination: {
                 total,
                 page: Number(page),
@@ -454,6 +521,7 @@ module.exports = {
     createDraftContent,
     updateDraftContent,
     getMyContents,
+    getAllContents,
     getMyContentById,
     deleteMyContent,
     requestContentApproval,
