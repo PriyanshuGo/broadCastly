@@ -21,9 +21,8 @@ const getLiveContentByTeacher = async (req, res) => {
             endTime: { $gte: now },
         })
             .select(
-                "title description subject files startTime endTime rotationDuration createdBy"
+                "title description files startTime endTime rotationDuration createdBy"
             )
-            .populate("subject", "name")
             .populate("createdBy", "name")
             .sort({ startTime: 1 });
 

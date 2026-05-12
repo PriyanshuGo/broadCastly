@@ -6,7 +6,6 @@ const { deleteMultipleFromCloudinary } = require("../utils/cloudinary");
 const getPendingApprovalRequests = async (req, res) => {
     try {
         const contents = await Content.find({ status: "pending" })
-            .populate("subject", "name")
             .populate("createdBy", "name email")
             .populate("reviewedBy", "name email")
             .sort({ approvalRequestedAt: -1 });
@@ -32,7 +31,6 @@ const getApprovalRequestById = async (req, res) => {
         const { contentId } = req.params;
 
         const content = await Content.findById(contentId)
-            .populate("subject", "name")
             .populate("createdBy", "name email")
             .populate("reviewedBy", "name email")
             .populate("approvedBy", "name email")

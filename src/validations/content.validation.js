@@ -6,7 +6,6 @@ const validateCreateDraftContent = (req, res, next) => {
     const {
         title,
         description,
-        subject,
         startTime,
         endTime,
         rotationDuration,
@@ -16,10 +15,6 @@ const validateCreateDraftContent = (req, res, next) => {
 
     if (!title || !title.trim()) {
         errors.push("Title is required");
-    }
-
-    if (!subject || !isValidObjectId(subject)) {
-        errors.push("Valid subject is required");
     }
 
     if (!startTime) {

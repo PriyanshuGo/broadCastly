@@ -1,5 +1,4 @@
 const Content = require("../models/content.model");
-const Subject = require("../models/subject.model");
 const { uploadOnCloudinary, deleteMultipleFromCloudinary } = require("../utils/cloudinary");
 
 // ───────────── Create Draft Content ─────────────
@@ -9,23 +8,10 @@ const createDraftContent = async (req, res) => {
         const {
             title,
             description,
-            subject,
             startTime,
             endTime,
             rotationDuration,
         } = req.body;
-
-        const subjectExists = await Subject.findOne({
-            _id: subject,
-            isActive: true,
-        });
-
-        if (!subjectExists) {
-            return res.status(404).json({
-                success: false,
-                message: "Subject not found or inactive",
-            });
-        }
 
         const uploadedFiles = [];
 
@@ -53,7 +39,6 @@ const createDraftContent = async (req, res) => {
         const content = await Content.create({
             title,
             description,
-            subject,
             files: uploadedFiles,
             createdBy: req.user._id,
 
@@ -92,7 +77,6 @@ const updateDraftContent = async (req, res) => {
         const {
             title,
             description,
-            subject,
             startTime,
             endTime,
             rotationDuration,
@@ -116,22 +100,6 @@ const updateDraftContent = async (req, res) => {
                 success: false,
                 message: "Only draft content can be updated from this route",
             });
-        }
-
-        if (subject) {
-            const subjectExists = await Subject.findOne({
-                _id: subject,
-                isActive: true,
-            });
-
-            if (!subjectExists) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Subject not found or inactive",
-                });
-            }
-
-            content.subject = subject;
         }
 
         if (title !== undefined) content.title = title;
@@ -251,7 +219,6 @@ const getMyContents = async (req, res) => {
 
         const [contents, total, totalUploadedContent] = await Promise.all([
             Content.find(query)
-                .populate("subject", "name")
                 .populate("reviewedBy", "name email")
                 .populate("approvedBy", "name email")
                 .populate("rejectedBy", "name email")
@@ -315,7 +282,6 @@ const getAllContents = async (req, res) => {
 
         const [contents, total, totalUploadedContent] = await Promise.all([
             Content.find(query)
-                .populate("subject", "name")
                 .populate("createdBy", "name email")
                 .populate("reviewedBy", "name email")
                 .populate("approvedBy", "name email")
@@ -360,7 +326,6 @@ const getMyContentById = async (req, res) => {
             _id: contentId,
             createdBy: req.user._id,
         })
-            .populate("subject", "name")
             .populate("createdBy", "name email")
             .populate("reviewedBy", "name email")
             .populate("approvedBy", "name email")

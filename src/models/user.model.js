@@ -28,6 +28,13 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+    organization: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+      index: true,
+    },
+
     isActive: {
       type: Boolean,
       default: true,
