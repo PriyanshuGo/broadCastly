@@ -1,9 +1,11 @@
 const Content = require("../models/content.model");
 const { uploadOnCloudinary, deleteMultipleFromCloudinary } = require("../utils/cloudinary");
+const { ApiError } = require("../utils/ApiError");
+const { ApiResponse } = require("../utils/ApiResponse");
 
 // ───────────── Create Draft Content ─────────────
 
-const createDraftContent = async (req, res) => {
+const createDraftContent = async (req, res, next) => {
     try {
         const {
             title,
@@ -24,12 +26,9 @@ const createDraftContent = async (req, res) => {
                 );
 
                 if (!uploaded.success) {
-                    return res.status(500).json({
-                        success: false,
-                        message: "File upload failed",
-                        error: uploaded.error,
-                        details: uploaded.details,
-                    });
+                    return next(
+                        new ApiError(500, "File upload failed", [uploaded.error])
+                    );
                 }
 
                 uploadedFiles.push(uploaded.file);
@@ -53,24 +52,18 @@ const createDraftContent = async (req, res) => {
             rotationDuration,
         });
 
-        return res.status(201).json({
-            success: true,
-            message: "Content draft created successfully",
-            data: content,
-        });
+        return res.status(201).json(
+            new ApiResponse(201, content, "Content draft created successfully")
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to create content draft",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to create content draft", [error.message]));
     }
 };
 
 
 // ───────────── Update Draft Content ─────────────
 
-const updateDraftContent = async (req, res) => {
+const updateDraftContent = async (req, res, next) => {
     try {
         const { contentId } = req.params;
 
@@ -89,17 +82,11 @@ const updateDraftContent = async (req, res) => {
         });
 
         if (!content) {
-            return res.status(404).json({
-                success: false,
-                message: "Content not found",
-            });
+            return next(new ApiError(404, "Content not found"));
         }
 
         if (content.status !== "draft") {
-            return res.status(400).json({
-                success: false,
-                message: "Only draft content can be updated from this route",
-            });
+            return next(new ApiError(400, "Only draft content can be updated from this route"));
         }
 
         if (title !== undefined) content.title = title;
@@ -119,10 +106,7 @@ const updateDraftContent = async (req, res) => {
                     ? removeFilePublicIds
                     : JSON.parse(removeFilePublicIds);
             } catch (error) {
-                return res.status(400).json({
-                    success: false,
-                    message: "removeFilePublicIds must be a valid JSON array",
-                });
+                return next(new ApiError(400, "removeFilePublicIds must be a valid JSON array"));
             }
         }
 
@@ -135,11 +119,9 @@ const updateDraftContent = async (req, res) => {
                 const deleteResult = await deleteMultipleFromCloudinary(filesToRemove);
 
                 if (!deleteResult.success) {
-                    return res.status(500).json({
-                        success: false,
-                        message: "Failed to delete files from Cloudinary",
-                        error: deleteResult.error,
-                    });
+                    return next(
+                        new ApiError(500, "Failed to delete files from Cloudinary", [deleteResult.error])
+                    );
                 }
 
                 content.files = content.files.filter(
@@ -159,12 +141,9 @@ const updateDraftContent = async (req, res) => {
                 );
 
                 if (!uploaded.success) {
-                    return res.status(500).json({
-                        success: false,
-                        message: "File upload failed",
-                        error: uploaded.error,
-                        details: uploaded.details,
-                    });
+                    return next(
+                        new ApiError(500, "File upload failed", [uploaded.error])
+                    );
                 }
 
                 uploadedFiles.push(uploaded.file);
@@ -175,23 +154,17 @@ const updateDraftContent = async (req, res) => {
 
         await content.save();
 
-        return res.status(200).json({
-            success: true,
-            message: "Content draft updated successfully",
-            data: content,
-        });
+        return res.status(200).json(
+            new ApiResponse(200, content, "Content draft updated successfully")
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to update content draft",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to update content draft", [error.message]));
     }
 };
 
 // ───────────── Get My Contents ─────────────
 
-const getMyContents = async (req, res) => {
+const getMyContents = async (req, res, next) => {
     try {
         const {
             status,
@@ -230,31 +203,31 @@ const getMyContents = async (req, res) => {
             Content.countDocuments({ createdBy: req.user._id }),
         ]);
 
-        return res.status(200).json({
-            success: true,
-            message: "Contents fetched successfully",
-            data: contents,
-            totalUploadedContent,
-            pagination: {
-                total,
-                page: Number(page),
-                limit: Number(limit),
-                totalPages: Math.ceil(total / Number(limit)),
-            },
-        });
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                {
+                    contents,
+                    totalUploadedContent,
+                    pagination: {
+                        total,
+                        page: Number(page),
+                        limit: Number(limit),
+                        totalPages: Math.ceil(total / Number(limit)),
+                    },
+                },
+                "Contents fetched successfully"
+            )
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch contents",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to fetch contents", [error.message]));
     }
 };
 
 
 // ───────────── Get All Contents ─────────────
 
-const getAllContents = async (req, res) => {
+const getAllContents = async (req, res, next) => {
     try {
         const {
             status,
@@ -294,31 +267,31 @@ const getAllContents = async (req, res) => {
             Content.countDocuments({ status: { $ne: "draft" } }),
         ]);
 
-        return res.status(200).json({
-            success: true,
-            message: "All contents fetched successfully",
-            data: contents,
-            totalUploadedContent,
-            pagination: {
-                total,
-                page: Number(page),
-                limit: Number(limit),
-                totalPages: Math.ceil(total / Number(limit)),
-            },
-        });
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                {
+                    contents,
+                    totalUploadedContent,
+                    pagination: {
+                        total,
+                        page: Number(page),
+                        limit: Number(limit),
+                        totalPages: Math.ceil(total / Number(limit)),
+                    },
+                },
+                "All contents fetched successfully"
+            )
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch contents",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to fetch contents", [error.message]));
     }
 };
 
 
 // ───────────── Get My Content By Id ─────────────
 
-const getMyContentById = async (req, res) => {
+const getMyContentById = async (req, res, next) => {
     try {
         const { contentId } = req.params;
 
@@ -332,29 +305,20 @@ const getMyContentById = async (req, res) => {
             .populate("rejectedBy", "name email");
 
         if (!content) {
-            return res.status(404).json({
-                success: false,
-                message: "Content not found",
-            });
+            return next(new ApiError(404, "Content not found"));
         }
 
-        return res.status(200).json({
-            success: true,
-            message: "Content fetched successfully",
-            data: content,
-        });
+        return res.status(200).json(
+            new ApiResponse(200, content, "Content fetched successfully")
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch content",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to fetch content", [error.message]));
     }
 };
 
 // ───────────── Delete My Content ─────────────
 
-const deleteMyContent = async (req, res) => {
+const deleteMyContent = async (req, res, next) => {
     try {
         const { contentId } = req.params;
 
@@ -364,50 +328,37 @@ const deleteMyContent = async (req, res) => {
         });
 
         if (!content) {
-            return res.status(404).json({
-                success: false,
-                message: "Content not found",
-            });
+            return next(new ApiError(404, "Content not found"));
         }
 
         if (!["draft", "rejected"].includes(content.status)) {
-            return res.status(400).json({
-                success: false,
-                message: "Only draft or rejected content can be deleted",
-            });
+            return next(new ApiError(400, "Only draft or rejected content can be deleted"));
         }
 
         if (content.files && content.files.length > 0) {
             const deleteResult = await deleteMultipleFromCloudinary(content.files);
 
             if (!deleteResult.success) {
-                return res.status(500).json({
-                    success: false,
-                    message: "Failed to delete content files from Cloudinary",
-                    error: deleteResult.error,
-                });
+                return next(
+                    new ApiError(500, "Failed to delete content files from Cloudinary", [deleteResult.error])
+                );
             }
         }
 
         await Content.deleteOne({ _id: content._id });
 
-        return res.status(200).json({
-            success: true,
-            message: "Content deleted successfully",
-        });
+        return res.status(200).json(
+            new ApiResponse(200, {}, "Content deleted successfully")
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to delete content",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to delete content", [error.message]));
     }
 };
 
 
 // ───────────── Request / Re-request Approval ─────────────
 
-const requestContentApproval = async (req, res) => {
+const requestContentApproval = async (req, res, next) => {
     try {
         const { contentId } = req.params;
 
@@ -422,24 +373,15 @@ const requestContentApproval = async (req, res) => {
         });
 
         if (!content) {
-            return res.status(404).json({
-                success: false,
-                message: "Content not found",
-            });
+            return next(new ApiError(404, "Content not found"));
         }
 
         if (!["draft", "rejected"].includes(content.status)) {
-            return res.status(400).json({
-                success: false,
-                message: "Only draft or rejected content can be requested for approval",
-            });
+            return next(new ApiError(400, "Only draft or rejected content can be requested for approval"));
         }
 
         if (!content.files || content.files.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "At least one file is required before requesting approval",
-            });
+            return next(new ApiError(400, "At least one file is required before requesting approval"));
         }
 
         content.status = "pending";
@@ -467,17 +409,11 @@ const requestContentApproval = async (req, res) => {
 
         await content.save();
 
-        return res.status(200).json({
-            success: true,
-            message: "Content requested for approval successfully",
-            data: content,
-        });
+        return res.status(200).json(
+            new ApiResponse(200, content, "Content requested for approval successfully")
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to request content approval",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to request content approval", [error.message]));
     }
 };
 

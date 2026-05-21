@@ -36,7 +36,7 @@ app.use(cors({
 app.use(express.json());
 
 // Routes
-app.use(authRoutes);
+app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
 app.use("/content", contentRoutes);
 app.use("/approvals", approvalRoutes);

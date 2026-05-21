@@ -1,10 +1,11 @@
 const express = require("express");
 
-const { createUser } = require("../controllers/user.controller.js");
+const { registerUser, verifyUserOtp } = require("../controllers/user.controller.js");
 
 const router = express.Router();
 
-router.post("/create", createUser);
+router.post("/register", registerUser);
+router.post("/verify-otp", verifyUserOtp);
 
 module.exports = router;
 

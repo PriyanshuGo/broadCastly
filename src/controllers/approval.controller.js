@@ -1,32 +1,28 @@
 const Content = require("../models/content.model");
 const { deleteMultipleFromCloudinary } = require("../utils/cloudinary");
+const { ApiError } = require("../utils/ApiError");
+const { ApiResponse } = require("../utils/ApiResponse");
 
 // ───────────── Get Pending Approval Requests ─────────────
 
-const getPendingApprovalRequests = async (req, res) => {
+const getPendingApprovalRequests = async (req, res, next) => {
     try {
         const contents = await Content.find({ status: "pending" })
             .populate("createdBy", "name email")
             .populate("reviewedBy", "name email")
             .sort({ approvalRequestedAt: -1 });
 
-        return res.status(200).json({
-            success: true,
-            message: "Pending approval requests fetched successfully",
-            data: contents,
-        });
+        return res.status(200).json(
+            new ApiResponse(200, contents, "Pending approval requests fetched successfully")
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch pending approval requests",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to fetch pending approval requests", [error.message]));
     }
 };
 
 // ───────────── Get Approval Request Detail / Mark Reviewed ─────────────
 
-const getApprovalRequestById = async (req, res) => {
+const getApprovalRequestById = async (req, res, next) => {
     try {
         const { contentId } = req.params;
 
@@ -38,10 +34,7 @@ const getApprovalRequestById = async (req, res) => {
             .populate("approvalRequests.requestedBy", "name email");
 
         if (!content) {
-            return res.status(404).json({
-                success: false,
-                message: "Content not found",
-            });
+            return next(new ApiError(404, "Content not found"));
         }
 
         if (content.status === "pending" && !content.reviewedBy) {
@@ -50,40 +43,28 @@ const getApprovalRequestById = async (req, res) => {
             await content.save();
         }
 
-        return res.status(200).json({
-            success: true,
-            message: "Approval request fetched successfully",
-            data: content,
-        });
+        return res.status(200).json(
+            new ApiResponse(200, content, "Approval request fetched successfully")
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch approval request",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to fetch approval request", [error.message]));
     }
 };
 
 // ───────────── Approve Content ─────────────
 
-const approveContent = async (req, res) => {
+const approveContent = async (req, res, next) => {
     try {
         const { contentId } = req.params;
 
         const content = await Content.findById(contentId);
 
         if (!content) {
-            return res.status(404).json({
-                success: false,
-                message: "Content not found",
-            });
+            return next(new ApiError(404, "Content not found"));
         }
 
         if (content.status !== "pending") {
-            return res.status(400).json({
-                success: false,
-                message: "Only pending content can be approved",
-            });
+            return next(new ApiError(400, "Only pending content can be approved"));
         }
 
         content.status = "approved";
@@ -100,23 +81,17 @@ const approveContent = async (req, res) => {
 
         await content.save();
 
-        return res.status(200).json({
-            success: true,
-            message: "Content approved successfully",
-            data: content,
-        });
+        return res.status(200).json(
+            new ApiResponse(200, content, "Content approved successfully")
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to approve content",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to approve content", [error.message]));
     }
 };
 
 // ───────────── Reject Content ─────────────
 
-const rejectContent = async (req, res) => {
+const rejectContent = async (req, res, next) => {
     try {
         const { contentId } = req.params;
         const { rejectionReason } = req.body;
@@ -124,17 +99,11 @@ const rejectContent = async (req, res) => {
         const content = await Content.findById(contentId);
 
         if (!content) {
-            return res.status(404).json({
-                success: false,
-                message: "Content not found",
-            });
+            return next(new ApiError(404, "Content not found"));
         }
 
         if (content.status !== "pending") {
-            return res.status(400).json({
-                success: false,
-                message: "Only pending content can be rejected",
-            });
+            return next(new ApiError(400, "Only pending content can be rejected"));
         }
 
         content.status = "rejected";
@@ -151,34 +120,25 @@ const rejectContent = async (req, res) => {
 
         await content.save();
 
-        return res.status(200).json({
-            success: true,
-            message: "Content rejected successfully",
-            data: content,
-        });
+        return res.status(200).json(
+            new ApiResponse(200, content, "Content rejected successfully")
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to reject content",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to reject content", [error.message]));
     }
 };
 
 
 // ───────────── Delete Any Content (Principal/Admin) ─────────────
 
-const deleteContentByPrincipal = async (req, res) => {
+const deleteContentByPrincipal = async (req, res, next) => {
     try {
         const { contentId } = req.params;
 
         const content = await Content.findById(contentId);
 
         if (!content) {
-            return res.status(404).json({
-                success: false,
-                message: "Content not found",
-            });
+            return next(new ApiError(404, "Content not found"));
         }
 
         // delete all cloudinary files first
@@ -188,26 +148,17 @@ const deleteContentByPrincipal = async (req, res) => {
             );
 
             if (!deleteResult.success) {
-                return res.status(500).json({
-                    success: false,
-                    message: "Failed to delete content files from Cloudinary",
-                    error: deleteResult.error,
-                });
+                return next(new ApiError(500, "Failed to delete content files from Cloudinary", [deleteResult.error]));
             }
         }
 
         await Content.deleteOne({ _id: content._id });
 
-        return res.status(200).json({
-            success: true,
-            message: "Content deleted successfully",
-        });
+        return res.status(200).json(
+            new ApiResponse(200, {}, "Content deleted successfully")
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to delete content",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to delete content", [error.message]));
     }
 };
 

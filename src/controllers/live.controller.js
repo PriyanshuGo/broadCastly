@@ -1,15 +1,14 @@
 const mongoose = require("mongoose");
 const Content = require("../models/content.model");
+const { ApiError } = require("../utils/ApiError");
+const { ApiResponse } = require("../utils/ApiResponse");
 
-const getLiveContentByTeacher = async (req, res) => {
+const getLiveContentByTeacher = async (req, res, next) => {
     try {
         const { teacherId } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(teacherId)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid teacher id",
-            });
+            return next(new ApiError(400, "Invalid teacher id"));
         }
 
         const now = new Date();
@@ -26,20 +25,17 @@ const getLiveContentByTeacher = async (req, res) => {
             .populate("createdBy", "name")
             .sort({ startTime: 1 });
 
-        return res.status(200).json({
-            success: true,
-            message:
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                contents,
                 contents.length > 0
                     ? "Live content fetched successfully"
-                    : "No content available",
-            data: contents,
-        });
+                    : "No content available"
+            )
+        );
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch live content",
-            error: error.message,
-        });
+        return next(new ApiError(500, "Failed to fetch live content", [error.message]));
     }
 };
 

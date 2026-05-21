@@ -18,7 +18,7 @@ const contentSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
-        
+
         // ───────────── Attached Files ─────────────
 
         /**
@@ -203,13 +203,7 @@ const contentSchema = new mongoose.Schema(
             min: 1,
             default: 10,
         },
-        
-        organization: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Organization",
-            required: true,
-            index: true,
-        }
+
     },
     /**
      * Schema options:

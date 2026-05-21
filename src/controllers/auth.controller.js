@@ -2,6 +2,8 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
 const User = require("../models/user.model");
+const { verifyGoogleIdToken } = require("../utils/googleAuth");
+const { createAuthSession } = require("../utils/authSession");
 const Session = require("../models/session.model");
 
 const {
@@ -9,6 +11,9 @@ const {
   generateRefreshToken,
   verifyRefreshToken,
 } = require("../utils/jwt");
+
+const { ApiError } = require("../utils/ApiError");
+const { ApiResponse } = require("../utils/ApiResponse");
 
 const hashToken = (token) => {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -19,45 +24,29 @@ const getRefreshExpiryDate = () => {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 };
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and password are required",
-      });
+      return next(new ApiError(400, "Email and password are required"));
     }
 
     const user = await User.findOne({
       email: email.toLowerCase().trim(),
-    }).populate({
-      path: "role",
-      select: "name permissions",
-    });
+    })
 
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
+      return next(new ApiError(401, "Invalid credentials"));
     }
 
     if (!user.isActive) {
-      return res.status(403).json({
-        success: false,
-        message: "Your account is inactive",
-      });
+      return next(new ApiError(403, "Your account is inactive"));
     }
 
-    // const isMatch = await bcrypt.compare(password, user.password);
-    const isMatch = password === user.password;
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
+      return next(new ApiError(401, "Invalid credentials"));
     }
 
     const accessToken = generateAccessToken({
@@ -76,41 +65,91 @@ const login = async (req, res) => {
       expiresAt: getRefreshExpiryDate(),
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Login successful",
-      accessToken,
-      refreshToken,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: {
-          id: user.role._id,
-          name: user.role.name,
-          permissions: user.role.permissions,
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          accessToken,
+          refreshToken,
+          user: {
+            id: user._id,
+            email: user.email,
+          },
         },
-      },
-    });
+        "Login successful"
+      )
+    );
   } catch (error) {
-    console.error("Login error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    next(error);
   }
 };
 
-const refreshAccessToken = async (req, res) => {
+const googleAuth = async (req, res, next) => {
+  try {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      return next(new ApiError(400, "Google idToken is required"));
+    }
+
+    const googleUser = await verifyGoogleIdToken(idToken);
+    console.log("google user identified", googleUser);
+
+
+    if (!googleUser.email || !googleUser.emailVerified) {
+      return next(new ApiError(401, "Google email is not verified"));
+    }
+
+    let user = await User.findOne({
+      email: googleUser.email.toLowerCase().trim(),
+    });
+
+    if (!user) {
+      user = await User.create({
+        email: googleUser.email.toLowerCase().trim(),
+        authProvider: "google",
+        providerId: googleUser.providerId,
+      });
+    } else {
+      if (!user.isActive) {
+        return next(new ApiError(403, "Account is inactive"));
+      }
+
+      if (user.authProvider === "local") {
+        user.authProvider = "google";
+        user.providerId = googleUser.providerId;
+        await user.save();
+      }
+    }
+
+    const { accessToken, refreshToken } = await createAuthSession(user, req);
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          accessToken,
+          refreshToken,
+          user: {
+            id: user._id,
+            email: user.email,
+            authProvider: user.authProvider,
+          },
+        },
+        "Google login successful"
+      )
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+const refreshAccessToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      return res.status(400).json({
-        success: false,
-        message: "Refresh token is required",
-      });
+      return next(new ApiError(400, "Refresh token is required"));
     }
 
     const decoded = verifyRefreshToken(refreshToken);
@@ -124,46 +163,37 @@ const refreshAccessToken = async (req, res) => {
     });
 
     if (!session) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid or expired session",
-      });
+      return next(new ApiError(401, "Invalid or expired session"));
     }
 
     const user = await User.findById(decoded.userId);
 
     if (!user || !user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: "User not allowed",
-      });
+      return next(new ApiError(401, "User not allowed"));
     }
 
     const accessToken = generateAccessToken({
       userId: user._id,
     });
 
-    return res.status(200).json({
-      success: true,
-      accessToken,
-    });
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        { accessToken },
+        "Access token refreshed successfully"
+      )
+    );
   } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid or expired refresh token",
-    });
+    return next(new ApiError(401, "Invalid or expired refresh token"));
   }
 };
 
-const logout = async (req, res) => {
+const logout = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      return res.status(400).json({
-        success: false,
-        message: "Refresh token is required",
-      });
+      return next(new ApiError(400, "Refresh token is required"));
     }
 
     await Session.findOneAndUpdate(
@@ -177,15 +207,15 @@ const logout = async (req, res) => {
       }
     );
 
-    return res.status(200).json({
-      success: true,
-      message: "Logged out successfully",
-    });
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {},
+        "Logged out successfully"
+      )
+    );
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Logout failed",
-    });
+    return next(new ApiError(500, "Logout failed"));
   }
 };
 
@@ -193,4 +223,5 @@ module.exports = {
   login,
   refreshAccessToken,
   logout,
+  googleAuth,
 };
