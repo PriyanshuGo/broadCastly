@@ -1,4 +1,4 @@
-const { ApiError } = require("../utils/ApiError");
+import { ApiError } from "../utils/ApiError.js";
 
 const errorHandler = (err, req, res, next) => {
     let error = err;
@@ -18,4 +18,4 @@ const errorHandler = (err, req, res, next) => {
     return res.status(error.statusCode).json(response);
 };
 
-module.exports = { errorHandler };
+export { errorHandler };

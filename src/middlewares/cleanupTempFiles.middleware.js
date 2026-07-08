@@ -1,4 +1,4 @@
-const fs = require("fs").promises;
+import fs from "fs/promises";
 
 const cleanupTempFiles = async (req, res, next) => {
     res.on("finish", async () => {
@@ -24,4 +24,4 @@ const cleanupTempFiles = async (req, res, next) => {
     next();
 };
 
-module.exports = { cleanupTempFiles };
+export { cleanupTempFiles };

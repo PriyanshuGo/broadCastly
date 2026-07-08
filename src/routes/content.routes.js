@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 
-const {
+import {
   createDraftContent,
   updateDraftContent,
   getMyContents,
@@ -8,30 +8,30 @@ const {
   getMyContentById,
   deleteMyContent,
   requestContentApproval,
-} = require("../controllers/content.controller");
+} from "../controllers/content.controller.js";
 
-const {
+import {
   authMiddleware,
-} = require("../middlewares/auth.middleware");
+} from "../middlewares/auth.middleware.js";
 
-const {
+import {
   requirePermission,
-} = require("../middlewares/permission.middleware");
+} from "../middlewares/permission.middleware.js";
 
-const {
+import {
   upload,
-} = require("../middlewares/multer.middleware");
+} from "../middlewares/multer.middleware.js";
 
-const {
+import {
   validateCreateDraftContent,
   validateRequestApproval,
-} = require("../validations/content.validation");
+} from "../validations/content.validation.js";
 
-const {
+import {
   cleanupTempFiles,
-} = require("../middlewares/cleanupTempFiles.middleware");
+} from "../middlewares/cleanupTempFiles.middleware.js";
 
-const { PERMISSIONS } = require("../constants/permissions");
+import { PERMISSIONS } from "../constants/permissions.js";
 
 const router = express.Router();
 
@@ -96,4 +96,4 @@ router.patch(
 );
 
 
-module.exports = router;
+export default router;

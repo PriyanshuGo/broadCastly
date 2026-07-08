@@ -1,5 +1,5 @@
-const Role = require("../models/role.model");
-const { PERMISSIONS } = require("../constants/permissions");
+import Role from "../models/role.model.js";
+import { PERMISSIONS } from "../constants/permissions.js";
 
 const seedRoles = async () => {
   const roles = [
@@ -30,4 +30,4 @@ const seedRoles = async () => {
   }
 };
 
-module.exports = { seedRoles };
+export { seedRoles };

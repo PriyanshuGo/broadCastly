@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const fileSchema = require("./file.model");
+import mongoose from "mongoose";
+import fileSchema from "./file.model.js";
 
 
 const contentSchema = new mongoose.Schema(
@@ -213,4 +213,4 @@ const contentSchema = new mongoose.Schema(
 );
 
 // Export the Content model bound to the "contents" MongoDB collection
-module.exports = mongoose.model("Content", contentSchema);
+export default mongoose.model("Content", contentSchema);

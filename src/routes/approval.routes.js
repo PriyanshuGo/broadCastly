@@ -1,21 +1,21 @@
-const express = require("express");
+import express from "express";
 
-const {
+import {
     getPendingApprovalRequests,
     getApprovalRequestById,
     approveContent,
     rejectContent,
     deleteContentByPrincipal,
-} = require("../controllers/approval.controller");
+} from "../controllers/approval.controller.js";
 
-const { authMiddleware } = require("../middlewares/auth.middleware");
-const { requirePermission } = require("../middlewares/permission.middleware");
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { requirePermission } from "../middlewares/permission.middleware.js";
 
-const { PERMISSIONS } = require("../constants/permissions");
+import { PERMISSIONS } from "../constants/permissions.js";
 
-const {
+import {
     validateRejectContent,
-} = require("../validations/content.validation");
+} from "../validations/content.validation.js";
 
 const router = express.Router();
 
@@ -55,4 +55,4 @@ router.delete(
     deleteContentByPrincipal
 );
 
-module.exports = router;
+export default router;

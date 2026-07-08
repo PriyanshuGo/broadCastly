@@ -1,7 +1,7 @@
-const Content = require("../models/content.model");
-const { uploadOnCloudinary, deleteMultipleFromCloudinary } = require("../utils/cloudinary");
-const { ApiError } = require("../utils/ApiError");
-const { ApiResponse } = require("../utils/ApiResponse");
+import Content from "../models/content.model.js";
+import { uploadOnCloudinary, deleteMultipleFromCloudinary } from "../utils/cloudinary.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 // ───────────── Create Draft Content ─────────────
 
@@ -418,7 +418,7 @@ const requestContentApproval = async (req, res, next) => {
 };
 
 
-module.exports = {
+export {
     createDraftContent,
     updateDraftContent,
     getMyContents,

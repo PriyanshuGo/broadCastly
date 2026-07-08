@@ -1,5 +1,5 @@
 // utils/email.util.js
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
 
 const sendEmailOtp = async (email, otp) => {
   try {
@@ -30,4 +30,4 @@ const sendEmailOtp = async (email, otp) => {
   }
 };
 
-module.exports = { sendEmailOtp };
+export { sendEmailOtp };

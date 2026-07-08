@@ -1,6 +1,6 @@
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs").promises;
+import multer from "multer";
+import path from "path";
+import fs from "fs/promises";
 
 // Temp directory
 const tempDir = path.join(process.cwd(), "temp", "content");
@@ -63,4 +63,4 @@ const upload = multer({
     fileFilter
 });
 
-module.exports = { upload, tempDir };
+export { upload, tempDir };

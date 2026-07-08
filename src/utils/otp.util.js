@@ -1,4 +1,4 @@
-const { redis } = require("../config/redis.js");
+import { redis } from "../config/redis.js";
 
 /**
  * Generate a 6-digit numeric OTP
@@ -64,7 +64,7 @@ const verifyOtpAndGetUserData = async (email, enteredOtp) => {
   return { valid: true, userDataString };
 };
 
-module.exports = {
+export {
   generateOtp,
   storeOtpWithUser,
   verifyOtpAndGetUserData

@@ -1,11 +1,11 @@
-const express = require("express");
+import express from "express";
 
-const {
+import {
     getLiveContentByTeacher,
-} = require("../controllers/live.controller");
+} from "../controllers/live.controller.js";
 
 const router = express.Router();
 
 router.get("/:teacherId", getLiveContentByTeacher);
 
-module.exports = router;
+export default router;

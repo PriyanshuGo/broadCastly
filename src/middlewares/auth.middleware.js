@@ -1,5 +1,5 @@
-const { verifyAccessToken } = require("../utils/jwt");
-const User = require("../models/user.model");
+import { verifyAccessToken } from "../utils/jwt.js";
+import User from "../models/user.model.js";
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -48,6 +48,6 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   authMiddleware,
 };

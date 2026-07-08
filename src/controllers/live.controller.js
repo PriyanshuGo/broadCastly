@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
-const Content = require("../models/content.model");
-const { ApiError } = require("../utils/ApiError");
-const { ApiResponse } = require("../utils/ApiResponse");
+import mongoose from "mongoose";
+import Content from "../models/content.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 const getLiveContentByTeacher = async (req, res, next) => {
     try {
@@ -39,6 +39,6 @@ const getLiveContentByTeacher = async (req, res, next) => {
     }
 };
 
-module.exports = {
+export {
     getLiveContentByTeacher,
 };

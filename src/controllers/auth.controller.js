@@ -1,19 +1,19 @@
-const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
-const User = require("../models/user.model");
-const { verifyGoogleIdToken } = require("../utils/googleAuth");
-const { createAuthSession } = require("../utils/authSession");
-const Session = require("../models/session.model");
+import User from "../models/user.model.js";
+import { verifyGoogleIdToken } from "../utils/googleAuth.js";
+import { createAuthSession } from "../utils/authSession.js";
+import Session from "../models/session.model.js";
 
-const {
+import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
-} = require("../utils/jwt");
+} from "../utils/jwt.js";
 
-const { ApiError } = require("../utils/ApiError");
-const { ApiResponse } = require("../utils/ApiResponse");
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 const hashToken = (token) => {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -73,6 +73,7 @@ const login = async (req, res, next) => {
           refreshToken,
           user: {
             id: user._id,
+            name: user.name,
             email: user.email,
           },
         },
@@ -106,6 +107,7 @@ const googleAuth = async (req, res, next) => {
 
     if (!user) {
       user = await User.create({
+        name: googleUser.name || normalizedEmail.split("@")[0],
         email: googleUser.email.toLowerCase().trim(),
         authProvider: "google",
         providerId: googleUser.providerId,
@@ -219,7 +221,7 @@ const logout = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   login,
   refreshAccessToken,
   logout,

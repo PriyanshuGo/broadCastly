@@ -1,13 +1,13 @@
-const express = require("express");
-const helmet = require("helmet");
-const cors = require("cors");
+import express from "express";
+import helmet from "helmet";
+import cors from "cors";
 
-const authRoutes = require("./routes/auth.routes");
-const userRoutes = require("./routes/user.routes");
-const contentRoutes = require("./routes/content.routes");
-const approvalRoutes = require("./routes/approval.routes");
-const liveRoutes = require("./routes/live.routes");
-const { errorHandler } = require("./middlewares/error.middleware");
+import authRoutes from "./routes/auth.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import contentRoutes from "./routes/content.routes.js";
+import approvalRoutes from "./routes/approval.routes.js";
+import liveRoutes from "./routes/live.routes.js";
+import { errorHandler } from "./middlewares/error.middleware.js";
 
 const app = express();
 
@@ -50,4 +50,4 @@ app.get("/", (req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
-module.exports = app;
+export default app;

@@ -1,10 +1,10 @@
-const crypto = require("crypto");
-const Session = require("../models/session.model");
+import crypto from "crypto";
+import Session from "../models/session.model.js";
 
-const {
+import {
   generateAccessToken,
   generateRefreshToken,
-} = require("./jwt");
+} from "./jwt.js";
 
 const hashToken = (token) => {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -38,7 +38,7 @@ const createAuthSession = async (user, req) => {
   };
 };
 
-module.exports = {
+export {
   hashToken,
   createAuthSession,
 };

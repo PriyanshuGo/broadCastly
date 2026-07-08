@@ -1,7 +1,7 @@
-const Content = require("../models/content.model");
-const { deleteMultipleFromCloudinary } = require("../utils/cloudinary");
-const { ApiError } = require("../utils/ApiError");
-const { ApiResponse } = require("../utils/ApiResponse");
+import Content from "../models/content.model.js";
+import { deleteMultipleFromCloudinary } from "../utils/cloudinary.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 // ───────────── Get Pending Approval Requests ─────────────
 
@@ -162,7 +162,7 @@ const deleteContentByPrincipal = async (req, res, next) => {
     }
 };
 
-module.exports = {
+export {
     getPendingApprovalRequests,
     getApprovalRequestById,
     approveContent,

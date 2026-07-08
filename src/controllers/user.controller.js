@@ -1,16 +1,16 @@
-const User = require("../models/user.model");
-const { generateOtp, storeOtpWithUser, verifyOtpAndGetUserData } = require("../utils/otp.util.js");
-const { sendEmailOtp } = require("../utils/email.util.js");
-const { ApiError } = require("../utils/ApiError.js");
-const { ApiResponse } = require("../utils/ApiResponse.js");
-const { asyncHandler } = require("../utils/asyncHandler.js");
+import User from "../models/user.model.js";
+import { generateOtp, storeOtpWithUser, verifyOtpAndGetUserData } from "../utils/otp.util.js";
+import { sendEmailOtp } from "../utils/email.util.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-const Session = require("../models/session.model");
-const {
+import Session from "../models/session.model.js";
+import {
   generateAccessToken,
   generateRefreshToken,
-} = require("../utils/jwt");
-const crypto = require("crypto");
+} from "../utils/jwt.js";
+import crypto from "crypto";
 
 
 const hashToken = (token) => {
@@ -144,7 +144,7 @@ const verifyUserOtp = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   registerUser,
   verifyUserOtp
 };

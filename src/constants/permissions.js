@@ -12,4 +12,4 @@ const PERMISSIONS = {
 
 };
 
-module.exports = { PERMISSIONS };
+export { PERMISSIONS };
