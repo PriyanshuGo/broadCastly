@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
-import { ApiError } from "./ApiError";
+import { ApiError } from "./ApiError.js";
 
 const generateAccessToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {
@@ -24,7 +24,7 @@ const getRefreshExpiryDate = () => {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 };
 
-export const verifyAccessToken = (token) => {
+const verifyAccessToken = (token) => {
   try {
     return jwt.verify(token, process.env.JWT_ACCESS_SECRET);
   } catch (error) {
@@ -40,7 +40,7 @@ export const verifyAccessToken = (token) => {
   }
 };
 
-export const verifyRefreshToken = (token) => {
+const verifyRefreshToken = (token) => {
   try {
     return jwt.verify(token, process.env.JWT_REFRESH_SECRET);
   } catch (error) {
@@ -62,5 +62,5 @@ export {
   verifyAccessToken,
   verifyRefreshToken,
   hashToken,
-  getRefreshExpiryDatew
+  getRefreshExpiryDate
 };

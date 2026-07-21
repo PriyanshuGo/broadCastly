@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import Session from "../models/session.model.js";
-
+import mongoose from "mongoose";
 import {
   generateAccessToken,
   generateRefreshToken,

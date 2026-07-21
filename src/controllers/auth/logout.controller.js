@@ -2,7 +2,7 @@ import User from "../../models/user.model.js";
 import Session from "../../models/session.model.js";
 
 import { hashToken, verifyRefreshToken } from "../../utils/jwt.js";
-import { ApiError } from "../../utils/ApiError";
+import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 
 
