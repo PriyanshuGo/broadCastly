@@ -16,15 +16,20 @@ const getRefreshExpiryDate = () => {
 };
 
 const createAuthSession = async (user, req) => {
+
+  const sessionId = new mongoose.Types.ObjectId();
+
   const accessToken = generateAccessToken({
     userId: user._id,
   });
 
   const refreshToken = generateRefreshToken({
     userId: user._id,
+    sessionId,
   });
 
   await Session.create({
+    _id: sessionId,
     user: user._id,
     refreshTokenHash: hashToken(refreshToken),
     userAgent: req.headers["user-agent"] || null,

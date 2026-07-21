@@ -5,9 +5,8 @@ import {
     login,
     refreshAccessToken,
     logout,
-    googleAuth,
 } from "../controllers/auth.controller.js";
-
+import {googleAuth} from "../controllers/auth/googleAuth.controller.js"
 
 router.post("/google", googleAuth);
 router.post("/login", login);

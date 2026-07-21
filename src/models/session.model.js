@@ -6,13 +6,11 @@ const sessionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
 
     refreshTokenHash: {
       type: String,
       required: true,
-      index: true,
     },
 
     userAgent: {
@@ -28,7 +26,6 @@ const sessionSchema = new mongoose.Schema(
     isRevoked: {
       type: Boolean,
       default: false,
-      index: true,
     },
 
     revokedAt: {
@@ -39,12 +36,18 @@ const sessionSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: true,
-      index: true,
     },
   },
   { timestamps: true }
 );
 
-sessionSchema.index({ user: 1, isRevoked: 1 });
+// Index for fetching all sessions of a user
+sessionSchema.index({ user: 1 });
+
+// TTL index: automatically delete expired sessions
+sessionSchema.index(
+  { expiresAt: 1 },
+  { expireAfterSeconds: 0 }
+);
 
 export default mongoose.model("Session", sessionSchema);
