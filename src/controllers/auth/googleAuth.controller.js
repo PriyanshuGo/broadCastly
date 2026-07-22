@@ -7,15 +7,13 @@ import User from "../../models/user.model.js";
 
 export const googleAuth = async (req, res, next) => {
     try {
-        const { idToken } = req.body;
+        const { idToken, deviceInfo } = req.body;
 
         if (!idToken) {
             return next(new ApiError(400, "Google idToken is required"));
         }
 
         const googleUser = await verifyGoogleIdToken(idToken);
-        console.log("google user identified", googleUser);
-
 
         if (!googleUser.email || !googleUser.emailVerified) {
             return next(new ApiError(401, "Google email is not verified"));
@@ -44,7 +42,7 @@ export const googleAuth = async (req, res, next) => {
             }
         }
 
-        const { accessToken, refreshToken } = await createAuthSession(user, req);
+        const { accessToken, refreshToken } = await createAuthSession(user, deviceInfo);
 
         return res.status(200).json(
             new ApiResponse(

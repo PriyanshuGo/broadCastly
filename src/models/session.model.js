@@ -13,14 +13,35 @@ const sessionSchema = new mongoose.Schema(
       required: true,
     },
 
-    userAgent: {
-      type: String,
-      default: null,
-    },
+    device: {
+      brand: {
+        type: String,
+        default: null,
+        trim: true,
+      },
 
-    ipAddress: {
-      type: String,
-      default: null,
+      model: {
+        type: String,
+        default: null,
+        trim: true,
+      },
+
+      osName: {
+        type: String,
+        default: null,
+        trim: true,
+      },
+
+      osVersion: {
+        type: String,
+        default: null,
+        trim: true,
+      },
+
+      type: {
+        type: String,
+        default: null,
+      },
     },
 
     isRevoked: {

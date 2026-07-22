@@ -4,18 +4,15 @@ import mongoose from "mongoose";
 import {
   generateAccessToken,
   generateRefreshToken,
+  hashToken
 } from "./jwt.js";
-
-const hashToken = (token) => {
-  return crypto.createHash("sha256").update(token).digest("hex");
-};
 
 const getRefreshExpiryDate = () => {
   const days = Number(process.env.REFRESH_TOKEN_EXPIRES_DAYS || 7);
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 };
 
-const createAuthSession = async (user, req) => {
+const createAuthSession = async (user, deviceInfo) => {
 
   const sessionId = new mongoose.Types.ObjectId();
 
@@ -32,8 +29,7 @@ const createAuthSession = async (user, req) => {
     _id: sessionId,
     user: user._id,
     refreshTokenHash: hashToken(refreshToken),
-    userAgent: req.headers["user-agent"] || null,
-    ipAddress: req.ip || req.connection?.remoteAddress || null,
+    device: deviceInfo,
     expiresAt: getRefreshExpiryDate(),
   });
 
@@ -43,7 +39,4 @@ const createAuthSession = async (user, req) => {
   };
 };
 
-export {
-  hashToken,
-  createAuthSession,
-};
+export { createAuthSession };
