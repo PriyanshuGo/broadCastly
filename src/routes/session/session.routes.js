@@ -7,7 +7,7 @@ import { terminateAllSession } from "../../controllers/session/terminateAllSessi
 const router = express.Router();
 
 router.get("/all", authenticate, getAllSessions);
-router.post("/terminateOne/:sessionID", authenticate, terminateAllSession);
-router.delete("terminateAll/:sessionId", authenticate, terminateOneSession);
+router.delete("/terminateOne/:sessionId", authenticate, terminateOneSession);
+router.delete("terminateAll/:sessionId", authenticate,  terminateAllSession);
 
 export default router;

@@ -5,15 +5,13 @@ import { ApiError } from "../../utils/ApiError.js";
 export const terminateAllSession = async (req, res, next) => {
   try {
     const userId = req.user?.userId;
+    const { currentSessionId } = req.params;
 
     if (!userId) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const currentSessionId =
-      req.params.sessionId ||
-      req.body.sessionId ||
-      req.query.sessionId;
+
 
     if (!currentSessionId) {
       return next(new ApiError(400, "Current session ID is required."));

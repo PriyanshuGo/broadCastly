@@ -18,6 +18,7 @@ const createAuthSession = async (user, deviceInfo) => {
 
   const accessToken = generateAccessToken({
     userId: user._id,
+    sessionId,
   });
 
   const refreshToken = generateRefreshToken({
