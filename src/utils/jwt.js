@@ -28,15 +28,31 @@ const verifyAccessToken = (token) => {
   try {
     return jwt.verify(token, process.env.JWT_ACCESS_SECRET);
   } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      throw new ApiError(401, "Access token has expired");
-    }
+    switch (error.name) {
+      case "TokenExpiredError":
+        throw new ApiError(
+          401,
+          "Your session has expired. Please sign in again."
+        );
 
-    if (error.name === "JsonWebTokenError") {
-      throw new ApiError(401, "Invalid access token");
-    }
+      case "JsonWebTokenError":
+        throw new ApiError(
+          401,
+          "Your session is invalid. Please sign in again."
+        );
 
-    throw new ApiError(401, "token verification failed");
+      case "NotBeforeError":
+        throw new ApiError(
+          401,
+          "Your session is not valid yet. Please try again."
+        );
+
+      default:
+        throw new ApiError(
+          401,
+          "Authentication failed. Please sign in again."
+        );
+    }
   }
 };
 
@@ -44,15 +60,31 @@ const verifyRefreshToken = (token) => {
   try {
     return jwt.verify(token, process.env.JWT_REFRESH_SECRET);
   } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      throw new ApiError(401, "Refresh token has expired");
-    }
+    switch (error.name) {
+      case "TokenExpiredError":
+        throw new ApiError(
+          401,
+          "Your login session has expired. Please sign in again."
+        );
 
-    if (error.name === "JsonWebTokenError") {
-      throw new ApiError(401, "Invalid refresh token");
-    }
+      case "JsonWebTokenError":
+        throw new ApiError(
+          401,
+          "Your login session is invalid. Please sign in again."
+        );
 
-    throw new ApiError(401, "Refresh token verification failed");
+      case "NotBeforeError":
+        throw new ApiError(
+          401,
+          "Your login session is not valid yet. Please try again."
+        );
+
+      default:
+        throw new ApiError(
+          401,
+          "Authentication failed. Please sign in again."
+        );
+    }
   }
 };
 

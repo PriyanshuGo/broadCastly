@@ -7,6 +7,7 @@ import userRoutes from "./routes/user.routes.js";
 import contentRoutes from "./routes/content.routes.js";
 import approvalRoutes from "./routes/approval.routes.js";
 import liveRoutes from "./routes/live.routes.js";
+import sessionRoutes from "./routes/session/session.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 
 const app = express();
@@ -41,6 +42,7 @@ app.use("/user", userRoutes);
 app.use("/content", contentRoutes);
 app.use("/approvals", approvalRoutes);
 app.use("/live", liveRoutes);
+app.use("/devices", sessionRoutes);
 
 // Health check
 app.get("/", (req, res) => {
