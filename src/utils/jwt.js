@@ -32,13 +32,13 @@ const verifyAccessToken = (token) => {
       case "TokenExpiredError":
         throw new ApiError(
           401,
-          "Your session has expired. Please sign in again."
+          "Access token expired"
         );
 
       case "JsonWebTokenError":
         throw new ApiError(
           401,
-          "Your session is invalid. Please sign in again."
+          "Invalid access token"
         );
 
       case "NotBeforeError":

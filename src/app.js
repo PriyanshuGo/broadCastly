@@ -14,10 +14,7 @@ const app = express();
 
 
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://cb-sfrontend.vercel.app"
-  ],
+  origin: "*",
   credentials: true
 }), helmet({
   frameguard: { action: "sameorigin" },

@@ -12,6 +12,12 @@ const getRefreshExpiryDate = () => {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 };
 
+export const getSessionDeletionDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 7);
+    return date;
+};
+
 const createAuthSession = async (user, deviceInfo) => {
 
   const sessionId = new mongoose.Types.ObjectId();

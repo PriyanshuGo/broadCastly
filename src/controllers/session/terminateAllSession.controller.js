@@ -1,6 +1,7 @@
 import Session from "../../models/session.model.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { ApiError } from "../../utils/ApiError.js";
+import {getSessionDeletionDate} from "../../utils/authSession.js"
 
 export const terminateAllSession = async (req, res, next) => {
   try {
@@ -8,10 +9,8 @@ export const terminateAllSession = async (req, res, next) => {
     const { currentSessionId } = req.params;
 
     if (!userId) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+      return next(new ApiError(401, "Unauthorized"));
     }
-
-
 
     if (!currentSessionId) {
       return next(new ApiError(400, "Current session ID is required."));
@@ -27,6 +26,7 @@ export const terminateAllSession = async (req, res, next) => {
         $set: {
           isRevoked: true,
           revokedAt: new Date(),
+          expiresAt: getSessionDeletionDate(),
         },
       }
     );
