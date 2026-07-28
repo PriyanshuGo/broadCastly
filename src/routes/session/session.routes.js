@@ -8,6 +8,6 @@ const router = express.Router();
 
 router.get("/all", authenticate, getAllSessions);
 router.delete("/terminateOne/:sessionId", authenticate, terminateOneSession);
-router.delete("terminateAll/:sessionId", authenticate,  terminateAllSession);
+router.delete("/terminateAll/:sessionId", authenticate,  terminateAllSession);
 
 export default router;
