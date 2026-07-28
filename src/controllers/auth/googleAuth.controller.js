@@ -42,8 +42,8 @@ export const googleAuth = async (req, res, next) => {
             }
         }
 
-        const { accessToken, refreshToken } = await createAuthSession(user, deviceInfo);
-
+        const { accessToken, refreshToken, sessionId } = await createAuthSession(user, deviceInfo);
+        console.log("login succesfull")
         return res.status(200).json(
             new ApiResponse(
                 200,
@@ -51,6 +51,8 @@ export const googleAuth = async (req, res, next) => {
                     accessToken,
                     refreshToken,
                     user: user.name,
+                    userId: user._id,
+                    sessionId,
                 },
                 "Google login successful"
             )

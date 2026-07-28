@@ -43,6 +43,7 @@ const createAuthSession = async (user, deviceInfo) => {
   return {
     accessToken,
     refreshToken,
+    sessionId
   };
 };
 
