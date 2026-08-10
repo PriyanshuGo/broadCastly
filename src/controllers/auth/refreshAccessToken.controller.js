@@ -1,14 +1,14 @@
 
 import User from "../../models/user.model.js";
 import Session from "../../models/session.model.js";
-import {ApiError} from "../../utils/ApiError.js"
-import {ApiResponse} from "../../utils/ApiResponse.js";
+import {ApiError} from "../../utils/common/ApiError.js"
+import {ApiResponse} from "../../utils/common/ApiResponse.js";
 
 import {
   generateAccessToken,
   verifyRefreshToken,
   hashToken,
-} from "../../utils/jwt.js";
+} from "../../utils/common/jwt.js";
 
 
 export const refreshAccessToken = async (req, res, next) => {

@@ -1,5 +1,5 @@
 import Session from "../../models/session.model.js";
-import { ApiResponse } from "../../utils/ApiResponse.js";
+import { ApiResponse } from "../../utils/common/ApiResponse.js";
 
 export const getAllSessions = async (req, res, next) => {
     try {

@@ -1,7 +1,7 @@
 import Session from "../../models/session.model.js";
-import { ApiResponse } from "../../utils/ApiResponse.js";
-import { ApiError } from "../../utils/ApiError.js";
-import {getSessionDeletionDate} from "../../utils/authSession.js"
+import { ApiResponse } from "../../utils/common/ApiResponse.js";
+import { ApiError } from "../../utils/common/ApiError.js";
+import {getSessionDeletionDate} from "../../utils//auth/authSession.js"
 
 export const terminateOneSession = async (req, res, next) => {
     try {

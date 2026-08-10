@@ -1,15 +1,15 @@
 import User from "../models/user.model.js";
-import { generateOtp, storeOtpWithUser, verifyOtpAndGetUserData } from "../utils/otp.util.js";
-import { sendEmailOtp } from "../utils/email.util.js";
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import { generateOtp, storeOtpWithUser, verifyOtpAndGetUserData } from "../utils/auth/otp.util.js";
+import { sendEmailOtp } from "../utils/auth/email.util.js";
+import { ApiError } from "../utils/common/ApiError.js";
+import { ApiResponse } from "../utils/common/ApiResponse.js";
+import { asyncHandler } from "../utils/common/asyncHandler.js";
 
 import Session from "../models/session.model.js";
 import {
   generateAccessToken,
   generateRefreshToken,
-} from "../utils/jwt.js";
+} from "../utils/common/jwt.js";
 import crypto from "crypto";
 
 

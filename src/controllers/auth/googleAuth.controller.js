@@ -38,6 +38,7 @@ export const googleAuth = async (req, res, next) => {
             if (user.authProvider === "local") {
                 user.authProvider = "google";
                 user.providerId = googleUser.providerId;
+                user.name = googleUser.name;
                 await user.save();
             }
         }

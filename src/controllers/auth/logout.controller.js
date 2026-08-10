@@ -1,10 +1,10 @@
 import User from "../../models/user.model.js";
 import Session from "../../models/session.model.js";
 
-import { hashToken, verifyRefreshToken } from "../../utils/jwt.js";
-import { ApiError } from "../../utils/ApiError.js";
-import { ApiResponse } from "../../utils/ApiResponse.js";
-import {getSessionDeletionDate} from "../../utils/authSession.js"
+import { hashToken, verifyRefreshToken } from "../../utils/common/jwt.js";
+import { ApiError } from "../../utils/common/ApiError.js";
+import { ApiResponse } from "../../utils/common/ApiResponse.js";
+import {getSessionDeletionDate} from "../../utils/auth/authSession.js"
 
 
 export const logout = async (req, res, next) => {

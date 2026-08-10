@@ -1,11 +1,11 @@
 import crypto from "crypto";
-import Session from "../models/session.model.js";
+import Session from "../../models/session.model.js";
 import mongoose from "mongoose";
 import {
   generateAccessToken,
   generateRefreshToken,
   hashToken
-} from "./jwt.js";
+} from "../common/jwt.js";
 
 const getRefreshExpiryDate = () => {
   const days = Number(process.env.REFRESH_TOKEN_EXPIRES_DAYS || 7);

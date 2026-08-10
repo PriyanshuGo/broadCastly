@@ -1,6 +1,6 @@
 import Session from "../../models/session.model.js";
-import { ApiResponse } from "../../utils/ApiResponse.js";
-import { ApiError } from "../../utils/ApiError.js";
+import { ApiResponse } from "../../utils/common/ApiResponse.js";
+import { ApiError } from "../../utils/common/ApiError.js";
 
 export const terminateAllSession = async (req, res, next) => {
   try {

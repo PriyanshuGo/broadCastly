@@ -1,4 +1,4 @@
-import { redis } from "../config/redis.js";
+import { redis } from "../../config/redis.js";
 
 /**
  * Generate a 6-digit numeric OTP
