@@ -56,6 +56,7 @@ const allowedImageTypes = [
     "image/jpeg",
     "image/png",
     "image/webp",
+    "image/jpg",
 ];
 
 const imageFileFilter = (req, file, cb) => {

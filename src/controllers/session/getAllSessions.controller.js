@@ -1,4 +1,4 @@
-import Session from "../../models/session.model.js";
+import Session from "../../models/user/session.model.js";
 import { ApiResponse } from "../../utils/common/ApiResponse.js";
 
 export const getAllSessions = async (req, res, next) => {
@@ -19,6 +19,6 @@ export const getAllSessions = async (req, res, next) => {
             )
         );
     } catch (error) {
-       return next(error);
+        return next(error);
     }
 }

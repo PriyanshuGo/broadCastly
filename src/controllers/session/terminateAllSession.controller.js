@@ -1,4 +1,4 @@
-import Session from "../../models/session.model.js";
+import Session from "../../models/user/session.model.js";
 import { ApiResponse } from "../../utils/common/ApiResponse.js";
 import { ApiError } from "../../utils/common/ApiError.js";
 

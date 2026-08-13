@@ -1,8 +1,8 @@
 
-import User from "../../models/user.model.js";
-import Session from "../../models/session.model.js";
-import {ApiError} from "../../utils/common/ApiError.js"
-import {ApiResponse} from "../../utils/common/ApiResponse.js";
+import User from "../../models/user/user.model.js";
+import Session from "../../models/user/session.model.js";
+import { ApiError } from "../../utils/common/ApiError.js"
+import { ApiResponse } from "../../utils/common/ApiResponse.js";
 
 import {
   generateAccessToken,

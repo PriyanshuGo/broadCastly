@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import Session from "../../models/session.model.js";
+import Session from "../../models/user/session.model.js";
 import mongoose from "mongoose";
 import {
   generateAccessToken,
@@ -13,9 +13,9 @@ const getRefreshExpiryDate = () => {
 };
 
 export const getSessionDeletionDate = () => {
-    const date = new Date();
-    date.setDate(date.getDate() + 7);
-    return date;
+  const date = new Date();
+  date.setDate(date.getDate() + 7);
+  return date;
 };
 
 const createAuthSession = async (user, deviceInfo) => {

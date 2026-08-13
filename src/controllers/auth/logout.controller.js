@@ -1,10 +1,10 @@
-import User from "../../models/user.model.js";
-import Session from "../../models/session.model.js";
+import User from "../../models/user/user.model.js";
+import Session from "../../models/user/session.model.js";
 
 import { hashToken, verifyRefreshToken } from "../../utils/common/jwt.js";
 import { ApiError } from "../../utils/common/ApiError.js";
 import { ApiResponse } from "../../utils/common/ApiResponse.js";
-import {getSessionDeletionDate} from "../../utils/auth/authSession.js"
+import { getSessionDeletionDate } from "../../utils/auth/authSession.js"
 
 
 export const logout = async (req, res, next) => {
@@ -18,7 +18,7 @@ export const logout = async (req, res, next) => {
     const decoded = verifyRefreshToken(refreshToken);
 
     const session = await Session.findById(decoded.sessionId);
-    
+
     if (!session) {
       return next(new ApiError(401, "Session not found"));
     }
@@ -34,11 +34,11 @@ export const logout = async (req, res, next) => {
         new ApiError(403, "You are not allowed to logout this session")
       );
     }
-    
+
     session.isRevoked = true;
     session.revokedAt = new Date();
     session.expiresAt = getSessionDeletionDate(),
-    await session.save();
+      await session.save();
 
     return res.status(200).json(
       new ApiResponse(200, {}, "Logged out successfully")

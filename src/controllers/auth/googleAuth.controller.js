@@ -1,8 +1,8 @@
-import { ApiError } from "../../utils/ApiError.js";
-import { ApiResponse } from "../../utils/ApiResponse.js";
-import { verifyGoogleIdToken } from "../../utils/googleAuth.js";
-import { createAuthSession } from "../../utils/authSession.js";
-import User from "../../models/user.model.js";
+import { ApiError } from "../../utils/common/ApiError.js";
+import { ApiResponse } from "../../utils/common/ApiResponse.js";
+import { verifyGoogleIdToken } from "../../utils/auth/googleAuth.js";
+import { createAuthSession } from "../../utils/auth/authSession.js";
+import User from "../../models/user/user.model.js";
 
 
 export const googleAuth = async (req, res, next) => {
@@ -44,7 +44,7 @@ export const googleAuth = async (req, res, next) => {
         }
 
         const { accessToken, refreshToken, sessionId } = await createAuthSession(user, deviceInfo);
-        console.log("login succesfull")
+        console.log(refreshToken, " refreshToken ,login succesfull")
         return res.status(200).json(
             new ApiResponse(
                 200,
