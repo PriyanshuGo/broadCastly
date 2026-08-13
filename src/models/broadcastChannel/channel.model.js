@@ -36,7 +36,7 @@ const channelSchema = new mongoose.Schema(
             },
         },
 
-        ChannelType: {
+        channelType: {
             type: String,
             enum: ["public", "private"],
             required: true,

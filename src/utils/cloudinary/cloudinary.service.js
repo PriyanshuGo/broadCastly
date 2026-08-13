@@ -1,16 +1,12 @@
-import { v2 as cloudinary } from "cloudinary";
-import fs from "fs/promises";
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import fs from "fs/promises";
+import cloudinary from "./cloudinary.config.js";
+
 
 /**
  * Upload a local file to Cloudinary (async-safe and structured)
  */
-const uploadOnCloudinary = async (
+export const uploadOnCloudinary = async (
     localFilePath,
     originalFile,
     {
@@ -65,13 +61,7 @@ const uploadOnCloudinary = async (
     } catch (error) {
 
         // Log detailed internal error
-        console.error("Cloudinary upload failed:", {
-            message: error.message,
-            code: error.code,
-            httpCode: error.http_code,
-            file: originalFile?.originalname,
-            folder,
-        });
+        console.error("FULL CLOUDINARY ERROR:", error);
 
         return {
             success: false,
@@ -100,7 +90,7 @@ const uploadOnCloudinary = async (
 /**
  * Delete a single file from Cloudinary
  */
-const deleteFromCloudinary = async (publicId, resourceType = "image") => {
+export const deleteFromCloudinary = async (publicId, resourceType = "image") => {
     if (!publicId) {
         return {
             success: false,
@@ -127,57 +117,4 @@ const deleteFromCloudinary = async (publicId, resourceType = "image") => {
     }
 };
 
-/**
- * Delete multiple files from Cloudinary
- */
-const deleteMultipleFromCloudinary = async (files = []) => {
-    if (!Array.isArray(files) || files.length === 0) {
-        return {
-            success: false,
-            error: "No files provided",
-        };
-    }
 
-    try {
-        const groupedByResourceType = files.reduce((acc, file) => {
-            if (!file.publicId) return acc;
-
-            const resourceType = file.resourceType || "image";
-
-            if (!acc[resourceType]) {
-                acc[resourceType] = [];
-            }
-
-            acc[resourceType].push(file.publicId);
-
-            return acc;
-        }, {});
-
-        const results = {};
-
-        for (const resourceType of Object.keys(groupedByResourceType)) {
-            const result = await cloudinary.api.delete_resources(
-                groupedByResourceType[resourceType],
-                {
-                    resource_type: resourceType,
-                    invalidate: true,
-                }
-            );
-
-            results[resourceType] = result.deleted;
-        }
-
-        return {
-            success: true,
-            deleted: results,
-        };
-    } catch (error) {
-        return {
-            success: false,
-            error: "Cloudinary bulk delete failed",
-            details: error.message,
-        };
-    }
-};
-
-export { uploadOnCloudinary, deleteFromCloudinary, deleteMultipleFromCloudinary };
