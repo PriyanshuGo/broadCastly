@@ -13,97 +13,119 @@ cloudinary.config({
 const uploadOnCloudinary = async (
     localFilePath,
     originalFile,
-    folder = "content"
+    {
+        folder = "content",
+        resourceType = "auto",
+    } = {}
 ) => {
     if (!localFilePath) {
-        return { success: false, error: "No file path provided" };
+        return {
+            success: false,
+            code: "FILE_PATH_MISSING",
+            error: "No file path provided.",
+        };
     }
 
     try {
-        // Check if file exists
+        // Make sure temporary file exists
         await fs.access(localFilePath);
 
-        // Upload to Cloudinary
-        const response = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "auto",
-            folder,
-        });
-
-        // Remove local temp file safely
-        try {
-            await fs.unlink(localFilePath);
-        } catch (unlinkError) {
-            console.warn("Failed to delete temp file:", unlinkError.message);
-        }
+        const response = await cloudinary.uploader.upload(
+            localFilePath,
+            {
+                resource_type: resourceType,
+                folder,
+            }
+        );
 
         return {
             success: true,
 
             file: {
                 url: response.secure_url,
-
                 publicId: response.public_id,
-
                 resourceType: response.resource_type,
-
                 format: response.format,
 
-                originalName: originalFile.originalname,
+                originalName:
+                    originalFile?.originalname || null,
 
-                mimeType: originalFile.mimetype,
+                mimeType:
+                    originalFile?.mimetype || null,
 
-                sizeBytes: originalFile.size,
+                sizeBytes:
+                    originalFile?.size || null,
 
-                width: response.width,
-
-                height: response.height,
-
-                duration: response.duration,
+                width: response.width || null,
+                height: response.height || null,
+                duration: response.duration || null,
             },
         };
+
     } catch (error) {
-        // Attempt cleanup if upload failed
-        try {
-            await fs.unlink(localFilePath);
-        } catch { }
+
+        // Log detailed internal error
+        console.error("Cloudinary upload failed:", {
+            message: error.message,
+            code: error.code,
+            httpCode: error.http_code,
+            file: originalFile?.originalname,
+            folder,
+        });
 
         return {
             success: false,
-            error: "Cloudinary upload failed",
-            details: error.message,
+            code: "CLOUDINARY_UPLOAD_FAILED",
+            error: "Failed to upload the file. Please try again.",
         };
+
+    } finally {
+
+        // Always remove temporary file
+        try {
+            await fs.unlink(localFilePath);
+        } catch (cleanupError) {
+
+            // ENOENT means file was already removed
+            if (cleanupError.code !== "ENOENT") {
+                console.error(
+                    "Failed to remove temporary file:",
+                    cleanupError.message
+                );
+            }
+        }
     }
 };
 
 /**
  * Delete a single file from Cloudinary
  */
-// const deleteFromCloudinary = async (publicId, resourceType = "image") => {
-//     if (!publicId) {
-//         return {
-//             success: false,
-//             error: "No publicId provided",
-//         };
-//     }
+const deleteFromCloudinary = async (publicId, resourceType = "image") => {
+    if (!publicId) {
+        return {
+            success: false,
+            error: "No publicId provided",
+        };
+    }
 
-//     try {
-//         const result = await cloudinary.uploader.destroy(publicId, {
-//             resource_type: resourceType,
-//             invalidate: true,
-//         });
+    try {
+        const result = await cloudinary.uploader.destroy(publicId, {
+            resource_type: resourceType,
+            invalidate: true,
+        });
 
-//         return {
-//             success: result.result === "ok" || result.result === "not found",
-//             result,
-//         };
-//     } catch (error) {
-//         return {
-//             success: false,
-//             error: "Cloudinary delete failed",
-//             details: error.message,
-//         };
-//     }
-// };
+        return {
+            success: result.result === "ok" || result.result === "not found",
+            result,
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: "Cloudinary delete failed",
+            details: error.message,
+        };
+    }
+};
 
 /**
  * Delete multiple files from Cloudinary
@@ -158,4 +180,4 @@ const deleteMultipleFromCloudinary = async (files = []) => {
     }
 };
 
-export { uploadOnCloudinary, deleteMultipleFromCloudinary };
+export { uploadOnCloudinary, deleteFromCloudinary, deleteMultipleFromCloudinary };

@@ -14,8 +14,6 @@ const channelSchema = new mongoose.Schema(
             type: String,
             required: true,
             unique: true,
-            lowercase: true,
-            trim: true,
             index: true,
         },
 
@@ -38,7 +36,7 @@ const channelSchema = new mongoose.Schema(
             },
         },
 
-        visibility: {
+        ChannelType: {
             type: String,
             enum: ["public", "private"],
             required: true,
@@ -56,7 +54,6 @@ const channelSchema = new mongoose.Schema(
             type: String,
             required: true,
             unique: true,
-            uppercase: true,
             index: true,
         },
 
