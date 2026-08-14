@@ -15,6 +15,8 @@ import {
     uploadOnCloudinary,
     deleteFromCloudinary,
 } from "../../utils/cloudinary/cloudinary.service.js";
+import {validateImageFile} from  "../../utils/fileValidation/imageValidator.js"
+
 
 
 export const createChannel = async (req, res, next) => {
@@ -42,6 +44,16 @@ export const createChannel = async (req, res, next) => {
 
     // Upload logo image to Cloudinary if provided
     if (req.file) {
+        const validation = await validateImageFile(req.file);
+
+        if (!validation.valid) {
+            await fs.unlink(req.file.path).catch(() => { });
+
+            return next(
+                new ApiError(400, validation.error)
+            );
+        }
+
         const uploadResult = await uploadOnCloudinary(
             req.file.path,
             req.file,
@@ -51,12 +63,11 @@ export const createChannel = async (req, res, next) => {
             }
         );
 
-
         if (!uploadResult.success) {
             return next(
                 new ApiError(
                     500,
-                    uploadResult.error || "Failed to upload channel logo"
+                    "Failed to upload channel logo."
                 )
             );
         }

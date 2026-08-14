@@ -53,14 +53,16 @@ const createStorage = (destination) =>
 // =========================
 
 const allowedImageTypes = [
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".jpg",
 ];
 
 const imageFileFilter = (req, file, cb) => {
-    if (allowedImageTypes.includes(file.mimetype)) {
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if (allowedImageTypes.includes(ext)) {
         cb(null, true);
     } else {
         cb(

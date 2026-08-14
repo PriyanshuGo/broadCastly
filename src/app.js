@@ -39,7 +39,7 @@ app.use("/devices", sessionRoutes);
 app.use("/channel", channelRoutes);
 
 // Health check
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
   res.send("API is running");
 });
 
