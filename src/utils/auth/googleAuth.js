@@ -15,6 +15,7 @@ const verifyGoogleIdToken = async (idToken) => {
     email: payload.email,
     name: payload.name,
     emailVerified: payload.email_verified,
+    profileImg: payload.picture,
   };
 };
 
