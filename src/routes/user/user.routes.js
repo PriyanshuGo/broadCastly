@@ -20,7 +20,7 @@ router.patch(
 
 // Check handle availability
 router.get(
-    "/profile/handle/check",
+    "/profile/check",
     authenticate,
     checkHandleAvailability
 );
