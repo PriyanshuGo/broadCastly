@@ -3,7 +3,7 @@ import helmet from "helmet";
 import cors from "cors";
 
 import authRoutes from "./routes/auth.routes.js";
-import userRoutes from "./routes/user.routes.js";
+import userRoutes from "./routes/user/user.routes.js";
 import sessionRoutes from "./routes/session/session.routes.js";
 import channelRoutes from "./routes/channel/channel.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";

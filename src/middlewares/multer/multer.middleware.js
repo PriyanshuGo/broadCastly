@@ -14,12 +14,19 @@ const channelLogoTempDir = path.join(
     "channel-logos"
 );
 
+const profileAvatarTempDir = path.join(
+    process.cwd(),
+    "temp",
+    "userProfile-avatar"
+);
+
 // Create temp directories
 (async () => {
     try {
         await Promise.all([
             fs.mkdir(contentTempDir, { recursive: true }),
             fs.mkdir(channelLogoTempDir, { recursive: true }),
+            fs.mkdir(profileAvatarTempDir, { recursive: true }),
         ]);
     } catch (error) {
         console.error("Failed to create upload directories:", error);
@@ -125,6 +132,8 @@ const channelLogoStorage = createStorage(
     channelLogoTempDir
 );
 
+const userAvatarStorage = createStorage(profileAvatarTempDir)
+
 // =========================
 // MULTER CONFIG
 // =========================
@@ -147,9 +156,17 @@ const channelLogoUpload = multer({
     fileFilter: imageFileFilter,
 });
 
+const userAvatarUpload = multer({
+    storage: userAvatarStorage,
+    limits: {
+        fileSize: 2 * 1024 * 1024,
+        files: 1,
+    },
+    fileFilter: imageFileFilter,
+});
+
 export {
     contentUpload,
     channelLogoUpload,
-    contentTempDir,
-    channelLogoTempDir,
+    userAvatarUpload,
 };

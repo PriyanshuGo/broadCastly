@@ -16,6 +16,6 @@ export const generateHandle = (name, email) => {
     .randomBytes(4)
     .toString("hex");
 
-  return `${base}-${suffix}`;
+  return `${base}${suffix}`;
 
 };
