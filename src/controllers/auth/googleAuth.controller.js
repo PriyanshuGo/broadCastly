@@ -5,6 +5,8 @@ import { createAuthSession } from "../../utils/auth/authSession.js";
 import User from "../../models/user/user.model.js";
 import UserProfile from "../../models/user/userProfile.model.js";
 import { generateHandle } from "../../utils/user/userProfile.js";
+import mongoose
+    from "mongoose";
 
 export const googleAuth = async (req, res, next) => {
     try {
@@ -20,11 +22,13 @@ export const googleAuth = async (req, res, next) => {
             return next(new ApiError(401, "Google email is not verified"));
         }
 
+        const normalizedEmail = googleUser.email.toLowerCase().trim();
+
         let user = await User.findOne({
-            email: googleUser.email.toLowerCase().trim(),
+            email: normalizedEmail,
         });
 
-
+        console.log(user, "user when logging in ")
         if (!user) {
             const MAX_RETRIES = 3;
 
@@ -36,9 +40,7 @@ export const googleAuth = async (req, res, next) => {
                         const [createdUser] = await User.create(
                             [
                                 {
-                                    name:
-                                        googleUser.name ||
-                                        normalizedEmail.split("@")[0],
+                                    name: googleUser.name || normalizedEmail.split("@")[0],
                                     email: normalizedEmail,
                                     authProvider: "google",
                                     providerId: googleUser.providerId,
@@ -47,19 +49,19 @@ export const googleAuth = async (req, res, next) => {
                             { session }
                         );
 
-                        user = createdUser;
+                        console.log(createdUser, "created user")
 
                         const handle = generateHandle(
-                            user.name,
-                            user.email
+                            createdUser.name,
+                            createdUser.email
                         );
 
                         await UserProfile.create(
                             [
                                 {
-                                    user: user._id,
+                                    user: createdUser._id,
                                     handle,
-                                    displayName: user.name,
+                                    displayName: createdUser.name,
                                     avatar: {
                                         url: googleUser.profileImg || null,
                                         publicId: null
@@ -68,6 +70,7 @@ export const googleAuth = async (req, res, next) => {
                             ],
                             { session }
                         );
+                        user = createdUser;
                     });
 
                     break; // transaction succeeded

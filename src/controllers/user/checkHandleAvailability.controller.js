@@ -1,5 +1,5 @@
-import { ApiResponse } from "../../utils/common/ApiResponse";
-import UserProfile from "../../models/user/userProfile.model";
+import { ApiResponse } from "../../utils/common/ApiResponse.js";
+import UserProfile from "../../models/user/userProfile.model.js";
 
 export const checkHandleAvailability = async (req, res, next) => {
     try {

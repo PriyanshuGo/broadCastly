@@ -1,6 +1,6 @@
-import { ApiError } from "../../utils/common/ApiError";
-import { ApiResponse } from "../../utils/common/ApiResponse";
-import UserProfile from "../../models/user/userProfile.model"
+import { ApiError } from "../../utils/common/ApiError.js";
+import { ApiResponse } from "../../utils/common/ApiResponse.js";
+import UserProfile from "../../models/user/userProfile.model.js"
 
 export const updateUserHandle = async (req, res, next) => {
     try {

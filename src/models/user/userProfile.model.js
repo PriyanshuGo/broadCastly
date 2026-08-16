@@ -48,6 +48,4 @@ const userProfileSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-userProfileSchema.index({ handle: 1 }, { unique: true });
-
 export default mongoose.model("UserProfile", userProfileSchema);
